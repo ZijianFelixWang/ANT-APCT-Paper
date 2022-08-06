@@ -1,0 +1,4279 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[    168037,       4271]
+NotebookOptionsPosition[    149963,       4040]
+NotebookOutlinePosition[    150785,       4068]
+CellTagsIndexPosition[    150742,       4065]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["A new type of automated prover based on category theory", "Title",
+ CellChangeTimes->{{3.8621658189314756`*^9, 3.8621658470990305`*^9}, 
+   3.8621658817519875`*^9},ExpressionUUID->"3475194a-e162-43da-bcdb-\
+b26a5f0bf0c2"],
+
+Cell[CellGroupData[{
+
+Cell["Zijian Wang", "Author",
+ CellChangeTimes->{{3.8621659126031103`*^9, 
+  3.8621659187678704`*^9}},ExpressionUUID->"15b3d076-9d7d-4604-89cd-\
+6d8dbd6132d6"],
+
+Cell["Northern Eastern Yucai School, Shenyang, Liaoning, P.R.China", \
+"Institution",
+ CellChangeTimes->{{3.8621659499128275`*^9, 
+  3.8621660051751485`*^9}},ExpressionUUID->"8b7ace94-da76-4540-8a18-\
+657e926298aa"],
+
+Cell["\<\
+In this article I present a new type of automated statement proof algorithm \
+based on new data structures, i.e. brackets and map graphs and new \
+algorithms. The brackets provide an elegant low-knowledge representation of \
+mathematical concepts. The map graphs offer an efficient machine-learning \
+method which let the computer learn knowledge while proving. Additionally, \
+the new finding is totally built on the category theory. Furthermore, a \
+prototype of the program is given.\
+\>", "Abstract",
+ CellChangeTimes->{{3.8621661164077234`*^9, 3.86216615413284*^9}, {
+  3.8621662006002703`*^9, 3.8621663537132454`*^9}, {3.862166409447956*^9, 
+  3.8621665528679276`*^9}},ExpressionUUID->"62fc1357-db88-4f4f-bc38-\
+e828e06c656f"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Introduction", "Section",
+ CellChangeTimes->{{3.862167654065876*^9, 3.8621676637685156`*^9}, {
+  3.8621682349238896`*^9, 3.862168235114118*^9}, {3.8680911670328712`*^9, 
+  3.868091167622346*^9}},ExpressionUUID->"80e37457-e666-4044-b96f-\
+3cfb183bfa89"],
+
+Cell["\<\
+During the long period of development of the research on automated theorem \
+provers, there have already existed a great number of research and \
+implementation on proofs focusing on a specific mathematical subject, such as \
+algebra equations (for example, Wolfram Mathematica\[CloseCurlyQuote]s \
+FindEquationProof function) or geometrical theorems (for example, the \
+Geometry Expert or GEX of Key Laboratory of Mathematics Mechanization, \
+Chinese Academy of Sciences). Some relatively new works in this aspect \
+includes Microsoft\[CloseCurlyQuote]s Lean prover and Z3 prover.\
+\>", "Text",
+ CellChangeTimes->{{3.8621676666984615`*^9, 3.862167682199931*^9}, {
+  3.862167721998909*^9, 3.8621677220010557`*^9}, {3.8680874000606856`*^9, 
+  3.8680874916271205`*^9}, {3.8680875461673293`*^9, 3.868087614826165*^9}, {
+  3.868087648156912*^9, 3.8680876614595594`*^9}, {3.8680877305182695`*^9, 
+  3.868087740331421*^9}, {3.8680879651336803`*^9, 3.8680880329350715`*^9}, {
+  3.868088201837323*^9, 
+  3.8680882434345193`*^9}},ExpressionUUID->"5765d764-c4d7-4417-a2ee-\
+35faf120ed55"],
+
+Cell["\<\
+However, if we investigate deeper into these algorithms, we will find the \
+fact that all of these provers stand on the basis of logic theories. Both \
+completely automated theorem provers and semi-automated computer auxiliary \
+theorem provers like Coq and Isabelle, are designed to follow certain logic \
+rules and generate results as logic formulas. Nevertheless, although we have \
+to admit that such do is an effective method, this method also sets an \
+insurmountable limit on the execution that the program could not think \
+comprehensively such as solving an algebra problem in a geometrical way.\
+\>", "Text",
+ CellChangeTimes->{{3.8621676666984615`*^9, 3.862167682199931*^9}, {
+  3.862167721998909*^9, 3.8621677220010557`*^9}, {3.8680874000606856`*^9, 
+  3.8680874916271205`*^9}, {3.8680875461673293`*^9, 3.868087614826165*^9}, {
+  3.868087648156912*^9, 3.8680876614595594`*^9}, {3.8680877305182695`*^9, 
+  3.868087740331421*^9}, {3.8680879651336803`*^9, 3.8680880329350715`*^9}, {
+  3.868088201837323*^9, 3.868088367934251*^9}, {3.8680884774655585`*^9, 
+  3.868088546471661*^9}, {3.868088601216007*^9, 3.868088654576412*^9}, {
+  3.868088691284864*^9, 3.868088727106351*^9}, {3.8680888365436597`*^9, 
+  3.8680888666516075`*^9}, {3.868088900294499*^9, 
+  3.8680889358375177`*^9}},ExpressionUUID->"e9752782-2e2e-4475-b42a-\
+43a54ef353e4"],
+
+Cell["\<\
+When we humans think of mathematical problems and perform proofs, we do not \
+follow purely logical ways like complex stuff like Cooper\[CloseCurlyQuote]s \
+algorithm. Instead, we just perform tries to seek breakthrough points using \
+his knowledge in a diversified thought. Why cannot programs do things like \
+that? Why cannot they perform some sort of knowledge transferring? Carry this \
+question and in experimental and curious attitude, I conducted the research \
+on this topic and have found a utility to do the task: the category theory.\
+\>", "Text",
+ CellChangeTimes->{{3.86808933869228*^9, 3.8680894319616656`*^9}, 
+   3.868090734367754*^9, 3.8681595854604692`*^9, {3.868512915306398*^9, 
+   3.8685129169887342`*^9}},ExpressionUUID->"4dac62e7-6e5d-4cb2-a8e3-\
+be1c77ff6c41"],
+
+Cell["\<\
+Mainly developed in the twentieth century by the contribution of MacLane and \
+Eilenberg with the purpose to investigate algebra topology, the category \
+theory is a fast-evolving aspect of modern mathematics. In just a few \
+decades, the category theory has become the standard and formal language of \
+homology algebra and algebraic geometry and has gained a lot of meaningful \
+achievements, for instance the Yoneda\[CloseCurlyQuote]s Lemma and Braid \
+categories, which serves as a neat explanation for the Yang-Baxter Equation \
+(YBE). Moreover, the category theory\[CloseCurlyQuote]s main idea, which is \
+to put mathematical structures into categories satisfies the worldview of the \
+Bourbaki school.\
+\>", "Text",
+ CellChangeTimes->{{3.86808933869228*^9, 3.8680895811066394`*^9}, {
+  3.868089727831914*^9, 3.868089802317608*^9}, {3.8680899545938025`*^9, 
+  3.868089968326598*^9}, {3.868089999422919*^9, 3.868090050052457*^9}, {
+  3.868090091199815*^9, 3.868090102719867*^9}, {3.8680901508538265`*^9, 
+  3.868090163448002*^9}, {3.8680904825641656`*^9, 
+  3.868090539581153*^9}},ExpressionUUID->"42a7f07b-f233-4331-aabb-\
+2777e2f66686"],
+
+Cell["\<\
+In this paper I will present a new approach of automated proving using \
+knowledge of the category, as well as its theoretical foundation, and will \
+provide a new algorithm which can prove mathematical statements \
+comprehensively. Additionally, an executable program and its implementation \
+process will be describe later.\
+\>", "Text",
+ CellChangeTimes->{{3.86808933869228*^9, 3.8680895811066394`*^9}, {
+  3.868089727831914*^9, 3.868089802317608*^9}, {3.8680899545938025`*^9, 
+  3.868089968326598*^9}, {3.868089999422919*^9, 3.868090050052457*^9}, {
+  3.868090091199815*^9, 3.868090102719867*^9}, {3.8680901508538265`*^9, 
+  3.868090163448002*^9}, {3.8680904825641656`*^9, 
+  3.868090719433939*^9}},ExpressionUUID->"83cd6986-0e81-44b5-adb0-\
+add6526bf782"],
+
+Cell[TextData[{
+ StyleBox["Structure of the paper.",
+  FontSlant->"Italic"],
+ " To be finished later."
+}], "Text",
+ CellChangeTimes->{{3.8621676666984615`*^9, 3.862167682199931*^9}, {
+  3.8621677229987316`*^9, 
+  3.862167742688385*^9}},ExpressionUUID->"c540985b-8bad-40af-b3d0-\
+ab69476ab407"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Preliminaries", "Section",
+ CellChangeTimes->{{3.8621676666984615`*^9, 3.8621677000584917`*^9}, {
+   3.862167754849361*^9, 3.862167756310896*^9}, {3.8621677996438103`*^9, 
+   3.8621678057210035`*^9}, {3.862168231824198*^9, 3.862168232286621*^9}, 
+   3.8680911752698464`*^9},ExpressionUUID->"3a724e6a-7d9c-42bd-8142-\
+aad3f1aa2e6f"],
+
+Cell[CellGroupData[{
+
+Cell["Notations and Conventions", "Subsection",
+ CellChangeTimes->{{3.8680917297162385`*^9, 3.868091732548605*^9}, {
+  3.868091826893607*^9, 
+  3.868091830402953*^9}},ExpressionUUID->"0e83cb01-12f8-4abd-a8b5-\
+7c62f11ae7cf"],
+
+Cell[TextData[{
+ "To begin with, we use notation ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalC]", TraditionalForm]],ExpressionUUID->
+  "8a28f83e-d0d0-44e4-b157-9d9869dca0d9"],
+ " to demonstrate a category and use script",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{" ", "\[ScriptCapitalF]"}], TraditionalForm]],ExpressionUUID->
+  "1fada750-debb-423d-bbd5-1e7f7562f962"],
+ " to demonstrate a functor. ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalU]", TraditionalForm]],ExpressionUUID->
+  "f2323f51-37d6-4978-8ef6-2cefacaf014b"],
+ " stands for the Grothendieck universe selected and ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalF]\[ScriptO]\[ScriptR]", TraditionalForm]],
+  ExpressionUUID->"b840d732-dba9-401a-84af-6c3340ad148b"],
+ " stands for the forgetful functor. A map is noted in one of the two \
+following forms:"
+}], "Text",
+ CellChangeTimes->{{3.8680918347754335`*^9, 3.86809192230061*^9}, {
+  3.868091957281033*^9, 3.8680919994177256`*^9}, {3.868159560868193*^9, 
+  3.868159736205911*^9}, {3.868159896983746*^9, 3.8681598972008944`*^9}, {
+  3.8681599771747837`*^9, 
+  3.868159987333506*^9}},ExpressionUUID->"64e47d8e-93de-470e-a2aa-\
+e3fa3da3d9a0"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"f", ":", " ", "A"}], "\[Rule]", "B"}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8681597840384884`*^9, 
+  3.868159799918428*^9}},ExpressionUUID->"50f5c058-4ca8-4034-b2d5-\
+32963f6f75bf"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"x", "\[Function]", "y"}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8681597840384884`*^9, 3.868159872307119*^9}, {
+   3.868172800969366*^9, 3.8681728025683527`*^9}, {3.8681745196411953`*^9, 
+   3.868174522816042*^9}, {3.868175299895284*^9, 3.868175306560316*^9}, 
+   3.868175469522581*^9},ExpressionUUID->"1fad41d3-3561-40ea-87cc-\
+ca1b1f1c255b"],
+
+Cell[TextData[{
+ "where ",
+ Cell[BoxData[
+  FormBox["A", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "67747608-7b7e-40fc-b21e-3bf0b3808ded"],
+ " and ",
+ Cell[BoxData[
+  FormBox["B", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "2bec4a79-25e6-4a86-bb44-205eac6cf733"],
+ " are sets and",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{" ", "x", " "}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "288cc8be-9345-4a6b-96e8-8eaac74cc95b"],
+ "and ",
+ Cell[BoxData[
+  FormBox["y", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "7281110f-25d5-4466-9309-0e3a1ddf3ef2"],
+ " are elements in ",
+ Cell[BoxData[
+  FormBox["A", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "a5db442b-0921-4635-9d0a-5776e47310f8"],
+ " and ",
+ Cell[BoxData[
+  FormBox["B", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "7c5f28af-f361-4291-9884-6ac663cc632b"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.868159873515294*^9, 3.8681599113332434`*^9}, {
+  3.8681599576474853`*^9, 
+  3.8681599744873247`*^9}},ExpressionUUID->"65deb081-6161-41e5-9f81-\
+d57abd03cb86"],
+
+Cell[TextData[{
+ " Furthermore, we use ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"s", 
+    RowBox[{"(", "f", ")"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "40808d82-679a-42e3-bc5e-4ee5c49ae302"],
+ " for the source object of morphism ",
+ Cell[BoxData[
+  FormBox["f", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e7aa212c-c4a1-49c0-a604-63358af0d7a0"],
+ StyleBox[" ",
+  FontSlant->"Italic"],
+ "and use ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"t", 
+    RowBox[{"(", "f", ")"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "53df56bc-85e5-43fe-8958-90d2d3640b89"],
+ " for the target object of morphism",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{" ", "f"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "2d45a260-cfb0-46d0-b7b0-193a94600288"],
+ ". The symbol ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Ob", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "cc4c6349-3d47-4019-b633-53c8e2fe4166"],
+ " stands for the object collection for the category ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalC]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5ba35eee-af4a-407f-b40f-3123b3e95716"],
+ ". We annotate the morphism set for a category with notation ",
+ Cell[BoxData[
+  FormBox["Mor", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "8f091e4f-7a03-4530-8b77-3b2b7f4622b8"],
+ " and annotate the ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Hom", "-", "set"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "ed9df8f6-8451-4303-896d-0fba7c3bc6ce"],
+ " for a category ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalC]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "f86f5d7c-0400-4a72-a837-e61c19a2279f"],
+ " between elements ",
+ Cell[BoxData[
+  FormBox["a", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "dc4b9e55-d31c-449b-9b87-de8cee107fc4"],
+ " and ",
+ Cell[BoxData[
+  FormBox["b", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "396ad2e7-99b6-4bf0-897c-1c35fcb7dc9a"],
+ " with notation ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SubscriptBox["Hom", "\[ScriptCapitalC]"], "(", 
+    RowBox[{"a", ",", "b"}], ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "3fe79665-b76d-433b-a9b4-51e4491643f5"],
+ ". "
+}], "Text",
+ CellChangeTimes->{{3.8680918347754335`*^9, 3.86809192230061*^9}, {
+  3.868091957281033*^9, 3.8680919994177256`*^9}, {3.868159560868193*^9, 
+  3.8681596025718884`*^9}, {3.8681599162947516`*^9, 3.868159933857294*^9}, {
+  3.868159992380762*^9, 3.8681601024170346`*^9}, {3.868160231945606*^9, 
+  3.86816026013978*^9}},ExpressionUUID->"33424d97-a138-4d6a-a872-\
+c3b58ed8bd2a"],
+
+Cell[TextData[{
+ "Basic logical operators like ",
+ Cell[BoxData[
+  FormBox["\[ForAll]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "9af94e5c-fa3c-472c-831e-3b73a7773b0e"],
+ ", ",
+ Cell[BoxData[
+  FormBox["\[Exists]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "3ddbd482-767b-4f06-bba9-8ad589268e87"],
+ " and ",
+ Cell[BoxData[
+  FormBox["\[Not]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "46bcfa0c-1a2e-42d8-99a1-545c51231aca"],
+ " are used while basic set operators such as ",
+ Cell[BoxData[
+  FormBox["\[Element]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b009a260-f9ac-4736-a890-7b9611bc2696"],
+ ", ",
+ Cell[BoxData[
+  FormBox["\[Subset]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b07d24b1-65af-489d-a356-744d1779f306"],
+ " and ",
+ Cell[BoxData[
+  FormBox["\[Union]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "1a20f9ea-1ec8-48da-ae9d-e4d210a9422a"],
+ " are used too. In addition, we use notation ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"|", "S", "|"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "6f6b8a62-7a99-48ab-ba7e-7c621d68e514"],
+ " for the size for set ",
+ Cell[BoxData[
+  FormBox["S", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "6bb8ca0d-2b7a-468c-9ebc-ec0f8baf14d3"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.8680918347754335`*^9, 3.86809192230061*^9}, {
+  3.868091957281033*^9, 3.8680919994177256`*^9}, {3.868159560868193*^9, 
+  3.8681596025718884`*^9}, {3.8681599162947516`*^9, 3.868159933857294*^9}, {
+  3.868159992380762*^9, 3.8681602143375883`*^9}, {3.8681602681389246`*^9, 
+  3.8681603204087963`*^9}, {3.8681756600635386`*^9, 
+  3.8681756622919025`*^9}},ExpressionUUID->"28530e85-603e-453e-8204-\
+8a88e5f121ca"],
+
+Cell[TextData[{
+ "For each ordered pair ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"t", "=", 
+    RowBox[{"(", 
+     RowBox[{"x", ",", "y"}], ")"}]}], TraditionalForm]],ExpressionUUID->
+  "3438acfa-5395-444a-b32f-7dd1f6828024"],
+ ", we use ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["t", "\[ScriptL]"], TraditionalForm]],ExpressionUUID->
+  "f062080f-f6c0-43c3-b316-4deff5041654"],
+ " for ",
+ Cell[BoxData[
+  FormBox["x", TraditionalForm]],ExpressionUUID->
+  "4530b23e-04a0-4bd7-8b5d-2ee1975684ce"],
+ " and ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["t", "\[ScriptR]"], TraditionalForm]],ExpressionUUID->
+  "ac106af5-be57-4dce-acea-72976035fd61"],
+ " for ",
+ Cell[BoxData[
+  FormBox["y", TraditionalForm]],ExpressionUUID->
+  "ce3df5bc-116c-465f-a7e5-e6d44e11fb7e"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.8682296749295387`*^9, 
+  3.8682297733182516`*^9}},ExpressionUUID->"fd75e875-edb3-4e40-8e7c-\
+27c287f80900"],
+
+Cell[TextData[{
+ "To avoid misunderstandings, ",
+ StyleBox["the Zermelo-Fraenkel set theory",
+  FontWeight->"Bold"],
+ " or ZFC as short is utilized to be the set system, with Grothendieck \
+universe concepts added."
+}], "Text",
+ CellChangeTimes->{
+  3.868160502182*^9},ExpressionUUID->"8607d048-d60e-4d79-8e75-98cedabe1b9a"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Pre-Knowledge", "Subsection",
+ CellChangeTimes->{{3.8681605123883967`*^9, 
+  3.868160516758831*^9}},ExpressionUUID->"3ed168ab-c34e-4268-8dfe-\
+2c1416c3e763"],
+
+Cell["\<\
+Readers should have basic understandings of the category theory and axiomatic \
+set theory. At least, they should know the basic concepts as well as these \
+conclusions and theorems:\
+\>", "Text",
+ CellChangeTimes->{{3.868160547385626*^9, 
+  3.8681606270303106`*^9}},ExpressionUUID->"6b2215e4-c523-4fec-b07b-\
+07b2df821661"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ StyleBox["Axiom.",
+  FontWeight->"Bold"],
+ " The Selection Axiom."
+}], "Axiom",
+ CellChangeTimes->{{3.8681611520776253`*^9, 3.868161165268981*^9}, {
+  3.8681732117667675`*^9, 
+  3.8681732127651305`*^9}},ExpressionUUID->"ab7507d0-f3e5-485d-8702-\
+bfc3acd9ba79"],
+
+Cell[TextData[{
+ "Let ",
+ Cell[BoxData[
+  FormBox["X", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "a62f1145-199c-42c2-b09b-58ce3f15e170"],
+ " be a set and each of ",
+ Cell[BoxData[
+  FormBox["X", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "da25c8e5-c48f-420b-b513-036077552df0"],
+ "\[CloseCurlyQuote]s elements not empty, then there exists function ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"g", ":", "X"}], "\[Rule]", 
+    RowBox[{"\[Union]", "X"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "c93aeef1-61de-43dd-b1bb-0678835de59c"],
+ " making ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[ForAll]", 
+     RowBox[{"x", "\[Element]", "X"}]}], ",", 
+    RowBox[{
+     RowBox[{"g", "(", "x", ")"}], "\[Element]", "x"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "6a8225c4-f560-45f3-ab72-06e2269e33bb"],
+ ", naming ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"g", "(", "x", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "06cc9289-422d-41b4-b6ce-189e9457ccde"],
+ " as the selection function."
+}], "AxiomContinuation",
+ CellChangeTimes->{{3.8681611936467505`*^9, 
+  3.868161268085512*^9}},ExpressionUUID->"bd710cdd-a258-4123-a99e-\
+66445cde32d9"]
+}, Open  ]],
+
+Cell["\<\
+The selection axiom is the ninth axiom in the Zermelo-Fraenkel set system and \
+it is equivalent to the theorem below.\
+\>", "Text",
+ CellChangeTimes->{{3.868172163734187*^9, 
+  3.8681722194298153`*^9}},ExpressionUUID->"8ea254d9-8ae9-4cff-bff3-\
+e61dd61c1212"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ StyleBox["Theorem. ",
+  FontWeight->"Bold"],
+ "The Zermelo\[CloseCurlyQuote]s Well-Ordering Theorem."
+}], "Theorem",
+ CellChangeTimes->{{3.868160547385626*^9, 3.868160625106985*^9}, {
+  3.8681606624913344`*^9, 3.868160699959529*^9}, {3.868173219876102*^9, 
+  3.868173220916899*^9}},ExpressionUUID->"8ceb3472-c91b-4010-8f4f-\
+7580eeac50f7"],
+
+Cell[TextData[{
+ "Every set ",
+ Cell[BoxData[
+  FormBox["S", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "9e6781e6-0c24-45a6-9615-cac8bc7cb8f4"],
+ " can be well-ordering as long as it has a choice function."
+}], "TheoremContinuation",
+ CellChangeTimes->{{3.868160720554327*^9, 3.868160728341857*^9}, {
+  3.868160899252266*^9, 
+  3.868160925352135*^9}},ExpressionUUID->"f420b955-8829-420a-ab6a-\
+39ef233ebc38"],
+
+Cell[TextData[{
+ StyleBox["Proof:",
+  FontWeight->"Bold"],
+ " First, we select element ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Mho]", "\[NotElement]", "S"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "2352b250-db8a-48a0-8c93-2b1789ac8192"],
+ ". As the ZFC system\[CloseCurlyQuote]s selection axiom enables to select \
+element ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"g", "(", 
+    RowBox[{"S", "'"}], ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "3e3ee510-fe75-42bb-9487-d5e79edaac5c"],
+ " from each subset ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"S", "'"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "cb6f8bcf-dca3-4312-b80e-3ceb65fb82d1"],
+ " of ",
+ Cell[BoxData[
+  FormBox["S", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "8ac9a149-9edd-4acf-9d11-67b8b442278f"],
+ ". Let ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SubscriptBox["a", "0"], ":=", 
+    RowBox[{"g", "(", "S", ")"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "d031238e-c378-446d-9405-215f024e6c99"],
+ ". Using transfinite recursive theorem to each ordinal ",
+ Cell[BoxData[
+  FormBox["\[Alpha]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "6bd6ae24-4cc0-4ca5-b13c-104041c0dab4"],
+ " we define:"
+}], "Proof",
+ CellChangeTimes->{{3.86816095942677*^9, 3.868160959427814*^9}, {
+  3.8681610477484064`*^9, 3.868161063432496*^9}, {3.8681610962787437`*^9, 
+  3.868161125485881*^9}, {3.8681722430058126`*^9, 3.8681722547725267`*^9}, {
+  3.868172407260909*^9, 3.868172550561761*^9}, {3.868172600813833*^9, 
+  3.86817269435983*^9}},ExpressionUUID->"f04ebc58-8ca7-468c-8c9c-\
+939ec22040a1"]
+}, Open  ]],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   SubscriptBox["a", "\[Alpha]"], ":=", 
+   RowBox[{"{", GridBox[{
+      {
+       RowBox[{
+        RowBox[{"g", "(", 
+         RowBox[{"S", "\[Backslash]", 
+          RowBox[{"{", 
+           RowBox[{
+            SubscriptBox["a", "\[Beta]"], "|", 
+            RowBox[{"\[Beta]", "<", "\[Alpha]"}]}], "}"}]}], ")"}], ","}], 
+       RowBox[{"S", "\[NotEqual]", 
+        RowBox[{"{", 
+         RowBox[{
+          SubscriptBox["a", "\[Beta]"], "|", 
+          RowBox[{"\[Beta]", "<", "\[Alpha]"}]}], "}"}]}]},
+      {
+       RowBox[{"\[Mho]", ","}], 
+       RowBox[{"S", "=", 
+        RowBox[{"{", 
+         RowBox[{
+          SubscriptBox["a", "\[Beta]"], "|", 
+          RowBox[{"\[Beta]", "<", "\[Alpha]"}]}], "}"}]}]}
+     }]}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8681727138397875`*^9, 3.8681727705951214`*^9}, {
+  3.868172832185508*^9, 
+  3.8681728797703657`*^9}},ExpressionUUID->"b5aaef94-3f60-4c6e-bbf8-\
+618888e86587"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Then, since ",
+ Cell[BoxData[
+  FormBox["S", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "1348a020-e179-445e-a9e7-e5498ea8c17c"],
+ " is a set, a minimized ",
+ Cell[BoxData[
+  FormBox["\[Theta]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "28fc2144-b25f-41bc-b9d8-9b5730575f5a"],
+ " can be chosen making ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{
+     SubscriptBox["a", "\[Theta]"], "=", "\[Mho]"}], ",", " ", 
+    RowBox[{"S", "=", 
+     RowBox[{"{", 
+      RowBox[{
+       SubscriptBox["a", "\[Beta]"], "|", 
+       RowBox[{"\[Beta]", "<", "\[Theta]"}]}], "}"}]}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "57fe4a16-a7f0-47db-9b2a-27db64afa3bb"],
+ " and significantly there exists a bijection between ",
+ Cell[BoxData[
+  FormBox["S", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "1722c824-2219-4968-8177-d8bb9a965a84"],
+ " and ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Theta]", "=", 
+    RowBox[{"{", 
+     RowBox[{"\[Beta]", "|", 
+      RowBox[{"\[Beta]", "<", "\[Theta]"}]}], "}"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "d71311a3-6716-4eae-adf2-e3e56cdc7cd5"],
+ ". Following the definition, there obviously exists a well-ordering on ",
+ Cell[BoxData[
+  FormBox["S", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "4001750d-5e80-4d2a-a3cc-80d0047e9a65"],
+ "."
+}], "ProofContinuation",
+ CellChangeTimes->{{3.868172899061383*^9, 3.8681730652904997`*^9}, {
+  3.8681731217446632`*^9, 3.868173125093246*^9}, {3.8681732254975414`*^9, 
+  3.868173241948609*^9}},ExpressionUUID->"8b364391-45e7-4367-8687-\
+6f2b08f7fcf8"],
+
+Cell["\[FilledSquare]", "QED",
+ CellChangeTimes->{{3.8681731516593523`*^9, 3.8681731895051546`*^9}},
+ TextAlignment->Right,ExpressionUUID->"b64a87f7-081c-4c41-ba4f-7a7291beca74"]
+}, Open  ]],
+
+Cell["\<\
+Some preliminary knowledge also includes the Ebbinghaus Forgetting Curve \
+equation used in this paper later. This approximate function is defined below:\
+\>", "Text",
+ CellChangeTimes->{{3.8681732003815627`*^9, 3.868173201746168*^9}, {
+  3.868173283989159*^9, 3.8681733287785373`*^9}, {3.8681734081429305`*^9, 
+  3.8681734195256076`*^9}, {3.868173582699583*^9, 
+  3.8681735845042677`*^9}},ExpressionUUID->"c7d902cf-37d1-4a43-8707-\
+c4777e52b7b0"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"B", "=", 
+   FractionBox[
+    RowBox[{"100", " ", "k"}], 
+    RowBox[{
+     SuperscriptBox[
+      RowBox[{"(", 
+       RowBox[{"ln", " ", "t"}], ")"}], "c"], "+", "k"}]]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8681734275094795`*^9, 3.8681734422727385`*^9}, {
+  3.8681740792170763`*^9, 
+  3.868174163444068*^9}},ExpressionUUID->"af088125-77ca-43a3-8d72-\
+af5fedbd8555"],
+
+Cell[TextData[{
+ "Where ",
+ Cell[BoxData[
+  FormBox["B", TraditionalForm]],ExpressionUUID->
+  "c28f60c1-63bd-4779-a03e-f8c4e4341ae2"],
+ " is percent of memorization while",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{" ", "t", " "}], TraditionalForm]],ExpressionUUID->
+  "99e70ee1-53f9-45c4-bed2-688540a2ccdf"],
+ "is time and ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"c", "=", "1.25"}], ",", 
+    RowBox[{"k", "=", "1.84"}]}], TraditionalForm]],ExpressionUUID->
+  "1d64262b-80fb-42df-b359-de2a14aceccc"],
+ ". This curve is used by the algorithm for self-optimization purposes."
+}], "Text",
+ CellChangeTimes->{{3.8681756205633826`*^9, 3.8681756314598436`*^9}, {
+  3.868175672676858*^9, 3.868175685092123*^9}, {3.868436988705805*^9, 
+  3.8684369896386905`*^9}},ExpressionUUID->"1f011bc5-6203-4f05-81b3-\
+9a90ea13175a"],
+
+Cell["\<\
+So as to avoid utilization of impure functions, a pseudo random generator is \
+used. We select the linear congruential generators, whose recursive equation \
+is,\
+\>", "Text",
+ CellChangeTimes->{{3.86843602896974*^9, 3.8684360502066326`*^9}, {
+  3.8684360802152405`*^9, 3.8684360961933575`*^9}, {3.8684361998740864`*^9, 
+  3.8684362117555075`*^9}, {3.8684368058794575`*^9, 3.8684368174897394`*^9}, {
+  3.8684368492498655`*^9, 
+  3.868436856128759*^9}},ExpressionUUID->"419fee54-40ab-47c2-a4bb-\
+7a7666eb49d0"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   SubscriptBox["X", 
+    RowBox[{"n", "+", "1"}]], "=", 
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"a", " ", 
+       SubscriptBox["X", "n"]}], "+", "c"}], ")"}], " ", "mod", " ", "M"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8684369618846517`*^9, 
+  3.868436980722434*^9}},ExpressionUUID->"56375ee1-a4e1-488e-899e-\
+d90f1566d050"],
+
+Cell["\<\
+Following the ANSI C implementation (Saucier, 2000), we determine the \
+parameters used by the recursive to the followings:\
+\>", "Text",
+ CellChangeTimes->{{3.8684369837892942`*^9, 3.8684369847627563`*^9}, {
+  3.868437046408742*^9, 
+  3.8684370844451036`*^9}},ExpressionUUID->"45b5aa7c-62c9-46b5-8f1f-\
+849be9e77e40"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"M", "=", 
+    SuperscriptBox["2", "32"]}], ",", 
+   RowBox[{"a", "=", "1103515245"}], ",", " ", 
+   RowBox[{"c", "=", "12345"}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868437087088812*^9, 3.8684370932376957`*^9}, {
+  3.8684371269048457`*^9, 3.8684371551408653`*^9}, {3.8684373156726313`*^9, 
+  3.8684373168382316`*^9}},ExpressionUUID->"998ed0c7-7a63-42ef-8589-\
+1617ae3cdeb1"],
+
+Cell[TextData[{
+ "In this paper we use notation ",
+ Cell[BoxData[
+  FormBox["\[ScriptR]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "806fa21f-95ad-4540-ae99-d5d9e5ba85b3"],
+ " to represent a new random number generated, which is actually a pure \
+function of the last random number and the expression is simplified for \
+representation\[CloseCurlyQuote]s explicitness."
+}], "Text",
+ CellChangeTimes->{{3.868437274978131*^9, 3.868437345364744*^9}, {
+  3.8684373786681147`*^9, 
+  3.8684373811340723`*^9}},ExpressionUUID->"24770d97-cde4-4518-8067-\
+97d61fa8d9bf"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The Computerized Representation of Mathematical Structures", "Section",
+ CellChangeTimes->{{3.868175719018425*^9, 3.8681757587356095`*^9}, {
+  3.8681758161949873`*^9, 
+  3.868175840075824*^9}},ExpressionUUID->"1bc0e8a2-48ba-4018-a936-\
+dcb0884d19ea"],
+
+Cell[TextData[{
+ "Before more specific discussion, we select Grothendieck universe ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalU]", TraditionalForm]],ExpressionUUID->
+  "2dc413d2-41d3-4fd2-976e-305300f626ab"],
+ " to avoid set theory paradoxes. Besides, we define meta category ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalC]", TraditionalForm]],ExpressionUUID->
+  "edea7140-0fae-4c3c-b24f-f4f413268fdf"],
+ " where all discussions take place. There are briefly three kind of objects \
+in ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalC]", TraditionalForm]],ExpressionUUID->
+  "85158ae9-32bd-4307-b1b2-d82dd61c4536"],
+ ": symbols, notations and brackets. All symbols in ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalC]", TraditionalForm]],ExpressionUUID->
+  "b91c1f06-acdc-448f-9f5e-55cc18ce0c9a"],
+ " forms sub category ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  ExpressionUUID->"bfae3559-58c7-4d7f-a77a-45b58294f26b"],
+ " called the ",
+ StyleBox["Symbol Subcategory",
+  FontWeight->"Bold"],
+ ". All notations in ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalC]", TraditionalForm]],ExpressionUUID->
+  "a8fa63d9-f517-42b1-8967-7cf40b1dd490"],
+ " forms ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  ExpressionUUID->"0a89ca7c-8606-45ee-8690-92441381501f"],
+ " and all brackets forms ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Bra", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  ExpressionUUID->"45c1f1e2-769e-43df-a029-d94657bb5c86"],
+ ", called the ",
+ StyleBox["Notation Subcategory",
+  FontWeight->"Bold"],
+ " and the ",
+ StyleBox["Bracket Subcategory",
+  FontWeight->"Bold"],
+ ". That is,"
+}], "Text",
+ CellChangeTimes->{{3.8681766872188873`*^9, 3.8681767084658823`*^9}, {
+  3.8681769235403023`*^9, 3.8681770273806868`*^9}, {3.868177934830562*^9, 
+  3.8681780972513485`*^9}, {3.8683425338309617`*^9, 
+  3.868342654567913*^9}},ExpressionUUID->"da036e55-abbf-45e6-92cf-\
+5c0126cdeb42"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[ScriptCapitalC]", "=", 
+   RowBox[{
+    RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], "\[SquareUnion]", 
+    RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}], "\[SquareUnion]", 
+    RowBox[{"Bra", "(", "\[ScriptCapitalC]", ")"}]}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683426582867956`*^9, 
+  3.868342699994583*^9}},ExpressionUUID->"6eab7b9d-7ad1-4e5c-b192-\
+9e5e3efa857d"],
+
+Cell["The three forms a partition of the big category.", "Text",
+ CellChangeTimes->{{3.868342945971738*^9, 
+  3.8683429621135473`*^9}},ExpressionUUID->"b75b14a2-0563-489d-967c-\
+a6f43dd1ac2c"],
+
+Cell["\<\
+Different from other implementations and research, we describe every major \
+mathematical structure to be used in seeking for proof, from single symbols \
+to contents of proof steps in a single data structure called brackets.\
+\>", "Text",
+ CellChangeTimes->{{3.8681766872188873`*^9, 3.8681767084658823`*^9}, {
+  3.8681769235403023`*^9, 3.8681770273806868`*^9}, {3.8683191128689175`*^9, 
+  3.86831911433197*^9}},ExpressionUUID->"bf05382d-0d13-4d98-8cd6-\
+6f02a153910b"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " A ",
+ StyleBox["bracket",
+  FontWeight->"Bold"],
+ " ",
+ Cell[BoxData[
+  FormBox["\[Beta]", TraditionalForm]],ExpressionUUID->
+  "847b5100-1735-4e73-b607-f10edde235b3"],
+ " is defined as a set of ordered pairs in the form of below:"
+}], "Definition",
+ CellChangeTimes->{{3.8681766872188873`*^9, 3.8681767084658823`*^9}, {
+  3.8681769235403023`*^9, 3.86817703312245*^9}, {3.8681770961153603`*^9, 
+  3.8681771078809433`*^9}, {3.868177183809326*^9, 3.8681771898034267`*^9}, {
+  3.868177220968602*^9, 3.868177285977215*^9}, {3.868177418669767*^9, 
+  3.8681774229733076`*^9}, {3.868177772141862*^9, 3.8681777759934216`*^9}, {
+  3.8682291686074405`*^9, 
+  3.8682292021185493`*^9}},ExpressionUUID->"4a817701-ef7f-4ce7-9372-\
+8ac528a39e96"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Beta]", ":=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"i", ",", "x"}], ")"}], "|", 
+      RowBox[{"i", "\[Element]", 
+       SubscriptBox["On", 
+        RowBox[{"\[GreaterEqual]", "1"}]]}]}], ",", 
+     RowBox[{"x", "\[Element]", 
+      RowBox[{
+       RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], "\[Union]", 
+       RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}], "\[Union]", 
+       RowBox[{"Bra", "(", "\[ScriptCapitalC]", ")"}]}]}]}], "}"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868177452941578*^9, 3.8681775929236574`*^9}, {
+  3.868177716722677*^9, 3.868177750259553*^9}, {3.868177802014266*^9, 
+  3.8681779290407014`*^9}, {3.8681781017146945`*^9, 3.868178404805418*^9}, {
+  3.8682291856856675`*^9, 3.868229212518964*^9}, {3.868229490764776*^9, 
+  3.8682295370958967`*^9}, {3.868429193789056*^9, 
+  3.8684291943132706`*^9}},ExpressionUUID->"c81e5eb3-cae9-4fba-bb73-\
+b91107667c07"],
+
+Cell[TextData[{
+ Cell[BoxData[
+  FormBox["\[Beta]", TraditionalForm]],ExpressionUUID->
+  "faf6d8f5-df4e-47f1-92bc-385ce3eaa302"],
+ " is valid if and only if every element of ",
+ Cell[BoxData[
+  FormBox["\[Beta]", TraditionalForm]],ExpressionUUID->
+  "7aad2fc1-d94f-43d1-bf3e-2a8eaffca582"],
+ ", its left element is unique. We define filtered subsets of ",
+ Cell[BoxData[
+  FormBox["\[Beta]", TraditionalForm]],ExpressionUUID->
+  "f6fe9c4c-8380-4c4b-b5f8-3462282542ca"],
+ ". The ",
+ StyleBox["Symbol Subset",
+  FontWeight->"Bold"],
+ " of ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SubscriptBox["\[Beta]", "\[ScriptCapitalS]"], ":=", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"t", "\[Element]", "\[Beta]"}], "|", 
+      RowBox[{
+       SubscriptBox["t", "\[ScriptR]"], "\[Element]", 
+       RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}]}]}], "}"}]}], 
+   TraditionalForm]],ExpressionUUID->"f311f316-69f1-4d5c-9cd6-bf78682e4364"],
+ ". Following this way, the ",
+ StyleBox["Notation Subset",
+  FontWeight->"Bold"],
+ " ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[Beta]", "\[ScriptCapitalN]"], TraditionalForm]],
+  ExpressionUUID->"500d97ee-b68f-4c68-90f2-393eeacc0a43"],
+ " and the ",
+ StyleBox["Bracket Subset",
+  FontWeight->"Bold"],
+ " ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[Beta]", "\[ScriptCapitalB]"], TraditionalForm]],
+  ExpressionUUID->"ce8d27f8-c7a1-4a39-aebe-29df25f7acda"],
+ " are defined as well. There are two types of brackets: The first type is \
+called a ",
+ StyleBox["Symbol Holder",
+  FontWeight->"Bold"],
+ " where ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[Beta]", "=", 
+     RowBox[{"{", 
+      RowBox[{"(", 
+       RowBox[{"i", ",", "A"}], ")"}], "}"}]}], ",", 
+    RowBox[{"i", "\[Element]", 
+     SubscriptBox["\[DoubleStruckCapitalZ]", 
+      RowBox[{"\[GreaterEqual]", "1"}]]}], ",", 
+    RowBox[{"A", "\[Element]", 
+     RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}]}]}], TraditionalForm]],
+  ExpressionUUID->"1c282f99-002c-4700-a2c1-6db691f48878"],
+ ". The second type is called a ",
+ StyleBox["Compositor",
+  FontWeight->"Bold"],
+ " where"
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.8682292857442846`*^9, 3.8682294260856247`*^9}, {
+  3.868229467266029*^9, 3.86822948230025*^9}, {3.8682295662375603`*^9, 
+  3.868229650784317*^9}, {3.868229795697049*^9, 3.868229910951685*^9}, {
+  3.868229949447094*^9, 3.8682300487417336`*^9}, {3.8682303909644346`*^9, 
+  3.8682304426106052`*^9}, {3.868342523107918*^9, 
+  3.868342528484108*^9}},ExpressionUUID->"922be8e3-9fab-4d1b-9b9c-\
+f1e0e745bf4b"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"\[Beta]", "=", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"(", 
+       RowBox[{"j", ",", "\[ScriptCapitalN]"}], ")"}], "}"}], "\[Union]", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{
+        RowBox[{"(", 
+         RowBox[{"i", ",", "x"}], ")"}], "|", 
+        RowBox[{"i", "\[Element]", 
+         SubscriptBox["On", 
+          RowBox[{"\[GreaterEqual]", "1"}]]}]}], ",", " ", 
+       RowBox[{"x", "\[Element]", 
+        RowBox[{
+         RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], "\[Union]", 
+         RowBox[{"Bra", "(", "\[ScriptCapitalC]", ")"}]}]}]}], "}"}]}]}], ",", 
+   RowBox[{"\[ForAll]", 
+    RowBox[{"t", "\[Element]", "\[Beta]"}]}], ",", 
+   RowBox[{"j", "\[Element]", 
+    SubscriptBox["On", 
+     RowBox[{"[", 
+      RowBox[{"1", ",", 
+       SubscriptBox["t", "\[ScriptL]"]}], "]"}]]}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868230056221464*^9, 3.8682301308338985`*^9}, {
+  3.8682301682203617`*^9, 3.8682302936769996`*^9}, {3.8682303810402203`*^9, 
+  3.8682303835569143`*^9}, {3.868429203516925*^9, 
+  3.868429212152856*^9}},ExpressionUUID->"fa2fe1ec-d844-4640-8d79-\
+204809da1f98"],
+
+Cell["\<\
+Here comes an important definition about bracket isomorphism which will be \
+referred inside the third section of this paper.\
+\>", "Text",
+ CellChangeTimes->{{3.8685174591084943`*^9, 3.868517499572361*^9}, {
+  3.868517682969638*^9, 
+  3.8685177157465453`*^9}},ExpressionUUID->"9efda54a-fc84-4c19-b0e6-\
+acd6e8e10e2c"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " Two bracket ",
+ Cell[BoxData[
+  FormBox["\[Alpha]", TraditionalForm]],ExpressionUUID->
+  "ea9d16ad-21ad-4cb8-8613-5d607e395dcb"],
+ " and ",
+ Cell[BoxData[
+  FormBox["\[Beta]", TraditionalForm]],ExpressionUUID->
+  "98f75cfd-d90e-49be-97de-9102ad6bbd05"],
+ ", are thought to be ",
+ StyleBox["isomorphic",
+  FontWeight->"Bold"],
+ " (noted as ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Alpha]", "\[TildeEqual]", "\[Beta]"}], TraditionalForm]],
+  ExpressionUUID->"c0a3d30d-e02a-419b-9de0-89a469244f28"],
+ ") if they satisfy the following restrictions:"
+}], "Definition",
+ CellChangeTimes->{{3.8685174591084943`*^9, 3.868517499572361*^9}, {
+  3.868517682969638*^9, 
+  3.8685178666187716`*^9}},ExpressionUUID->"6d2c7a23-78dd-4840-874c-\
+b17734b3e9d5"],
+
+Cell[TextData[{
+ "First, ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"|", "\[Alpha]", "|"}], "=", 
+    RowBox[{"|", "\[Beta]", "|"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "eca4ee63-6a8a-4b41-ab00-5c4c493b8113"],
+ " indicating the two brackets have same cardinal numbers. Second, all right \
+elements sorted in the order defined by the sort of the left pair elements, \
+correspondingly, are either same or symbols with the same type. Otherwise, \
+the two brackets are ",
+ StyleBox["not isomorphic",
+  FontWeight->"Bold"],
+ ", noted as ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Alpha]", "\[NotTildeEqual]", "\[Beta]"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "587c2961-bd4d-445a-bd4d-40213c15d690"],
+ "."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.8685178795275908`*^9, 3.868517925651248*^9}, {
+  3.8685183102189198`*^9, 3.868518391688948*^9}, {3.8685184509874697`*^9, 
+  3.8685186009496408`*^9}},ExpressionUUID->"94fd3795-22ed-4788-93a6-\
+d9361620e4d7"]
+}, Open  ]],
+
+Cell[TextData[{
+ "Next we define the mathematical representation for notations. A notation is \
+either a operator (for example, ",
+ Cell[BoxData[
+  FormBox["+", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "da135ea8-df1c-434c-aefd-325fd2599f99"],
+ " and ",
+ Cell[BoxData[
+  FormBox["\[CenterDot]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "50b3fc69-4bd2-465d-989d-8d1382bbfb2c"],
+ ") or a data type (for example, number and function). Its precise \
+declaration comes below."
+}], "Text",
+ CellChangeTimes->{{3.8682303030065985`*^9, 3.8682303857302704`*^9}, {
+  3.868230465434393*^9, 3.8682305958941393`*^9}, {3.868230730340825*^9, 
+  3.8682308301779065`*^9}},ExpressionUUID->"884fa704-c71e-4a92-bdb8-\
+3810145b83a5"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " A ",
+ StyleBox["notation",
+  FontWeight->"Bold"],
+ " ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],ExpressionUUID->
+  "e8408362-9a3e-44f8-bc3e-8e3b4fa49c84"],
+ " is defined as an object in ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  ExpressionUUID->"74ff8039-1eaa-474d-b9a0-b8da0d941e7a"],
+ " which is a sub category of ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalC]", TraditionalForm]],ExpressionUUID->
+  "0abd6c04-2133-469b-8bed-dbe44236178d"],
+ ". The ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Ob", "(", 
+    RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}], ")"}], TraditionalForm]],
+  ExpressionUUID->"1fef8714-e596-47de-b362-b21e2155182a"],
+ " set can be mapped to ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["On", 
+    RowBox[{"\[GreaterEqual]", "0"}]], TraditionalForm]],ExpressionUUID->
+  "8d471afb-6900-4e20-a76b-6f9c631e73db"],
+ " class, indicating the number of parameters that a notation take. In which,"
+}], "Definition",
+ CellChangeTimes->{{3.8682308391139913`*^9, 3.86823093302606*^9}, {
+  3.868230971935122*^9, 3.868231023613066*^9}, {3.86823105646457*^9, 
+  3.868231141892804*^9}, {3.8682315266109824`*^9, 3.868231529989999*^9}, {
+  3.8682390360996695`*^9, 3.868239040300844*^9}, {3.8682391057936363`*^9, 
+  3.8682391064883833`*^9}},ExpressionUUID->"ac8d8880-6e49-44c7-a4bf-\
+ca602986216e"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"\[ScriptP]", ":", 
+    RowBox[{"Ob", "(", 
+     RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}], ")"}]}], "\[Rule]", 
+   SubscriptBox["On", 
+    RowBox[{"\[GreaterEqual]", "0"}]]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8682311526902914`*^9, 3.8682312162294207`*^9}, {
+  3.868429186694751*^9, 
+  3.8684291876617785`*^9}},ExpressionUUID->"ab1c52e4-eb0f-46c1-a309-\
+3f1e0d234b3e"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[ScriptCapitalN]", 
+   OverscriptBox["\[Function]", "\[ScriptP]"], "n"}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8682311526902914`*^9, 
+  3.868231259093193*^9}},ExpressionUUID->"9d8ecbe7-b7c2-4b77-8a68-\
+6336ba947fc6"],
+
+Cell[TextData[{
+ "In that case if ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"n", "=", "0"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5f78f1ee-aec6-4a2d-b18c-5378247e02bc"],
+ " then we say ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "afa7820d-4e7e-4643-b404-453aaf6d4e00"],
+ " is a ",
+ StyleBox["type",
+  FontWeight->"Bold"],
+ " and if ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"n", ">", "0"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "65951f60-ec3e-463d-847b-a8a256860aba"],
+ " then ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "a91a74a8-60eb-4b12-8227-3c0e5dc495ac"],
+ " is an ",
+ StyleBox["operator",
+  FontWeight->"Bold"],
+ ". For instance, obviously, ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[ScriptP]", "(", "+", ")"}], "=", "2"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "58ee413c-6fb6-42a0-8941-bb7e4d0b864c"],
+ " and ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[ScriptP]", "(", "\[Not]", ")"}], "=", "1"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b89bfd63-27d4-4c8f-a6ad-d50b3ac8cbb0"],
+ ". A notation",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{" ", "\[ScriptCapitalN]"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5b059f17-3c57-4389-8d61-6169230be4cc"],
+ " is called ",
+ StyleBox["finite",
+  FontWeight->"Bold"],
+ " if ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[ScriptP]", "(", "\[ScriptCapitalN]", ")"}], "<", "\[Omega]"}], 
+   TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "dea61600-b846-403f-9be0-7b0a5411960c"],
+ ", and otherwise ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5c6628ab-91bd-42b4-aee6-7d2d442f3a80"],
+ " can have infinite number of symbols as parameters, when the notation is \
+called to be ",
+ StyleBox["infinite",
+  FontWeight->"Bold"],
+ "."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.8682312636922617`*^9, 3.8682313874489574`*^9}, {
+  3.868238929409233*^9, 3.8682389367727757`*^9}, {3.868239018874609*^9, 
+  3.8682390345783615`*^9}, {3.8682390827543883`*^9, 3.868239138914347*^9}, {
+  3.8682391721961856`*^9, 
+  3.868239196626892*^9}},ExpressionUUID->"f507a6c2-d9e0-4e22-8092-\
+9986287b30a7"],
+
+Cell["\<\
+After declaring what notations are, we then define symbols. Basically, a \
+symbol is an instance of a notation. As notations are like containers, a \
+symbol is like the content in them. The accurate representation of a symbol \
+comes below.\
+\>", "Text",
+ CellChangeTimes->{{3.8682314091346273`*^9, 
+  3.8682315014246607`*^9}},ExpressionUUID->"07411bc3-78c7-4a7f-8408-\
+37c69b34eedd"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " A ",
+ StyleBox["symbol",
+  FontWeight->"Bold"],
+ " ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalS]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "a8e87434-9c4a-4fb2-aef4-d34377acf2fb"],
+ " is defined as an object in ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "cb0d8eff-ba7c-4b3f-9859-89db41673c71"],
+ " which is a sub category of ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalC]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "53ae045d-3eb6-4fc1-92bf-16e1f8a099ba"],
+ ". There exists a functor from ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "fe2d42ba-574f-426b-887d-b641d4a6a349"],
+ " to ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "3b979c11-75ee-4282-939d-d66d78ba7970"],
+ ":"
+}], "Definition",
+ CellChangeTimes->{{3.8682315077492933`*^9, 3.868231541208604*^9}, {
+  3.8682319647375865`*^9, 3.8682319778958387`*^9}, {3.868232156778984*^9, 
+  3.8682321953939834`*^9}},ExpressionUUID->"ef0936b0-f1d9-43f8-8e01-\
+30e74a527f89"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"\[Nu]", ":", 
+    RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}]}], "\[Rule]", 
+   RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8682322070330353`*^9, 3.868232269064765*^9}, {
+  3.868232330839793*^9, 
+  3.8682323409379077`*^9}},ExpressionUUID->"31a30910-f466-4574-bd8f-\
+01b08aeecb9c"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[ScriptCapitalS]", 
+   OverscriptBox["\[Function]", "\[ScriptV]"], 
+   RowBox[{"\[Nu]", "(", "\[ScriptCapitalS]", ")"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8682322070330353`*^9, 3.868232328785654*^9}, {
+  3.868318367404228*^9, 
+  3.868318368416775*^9}},ExpressionUUID->"718ad4be-102e-426f-ac05-\
+901853ead090"],
+
+Cell[TextData[{
+ "Where ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Nu]", "(", "\[ScriptCapitalS]", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "39221a3f-fb3b-4801-aab3-28c9f606affa"],
+ " is the ",
+ StyleBox["corresponding notation",
+  FontWeight->"Bold"],
+ " of ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalS]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "9bceec39-c9b8-4419-8aec-81f0a6c3bc59"],
+ " and must satisfy ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[ForAll]", 
+     RowBox[{"\[ScriptCapitalS]", "\[Element]", 
+      RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}]}]}], ",", 
+    RowBox[{
+     RowBox[{"\[ScriptP]", "(", 
+      RowBox[{"\[Nu]", "(", "\[ScriptCapitalS]", ")"}], ")"}], "=", "0"}]}], 
+   TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "9178d1a7-dc03-47ac-af69-fcf8354d1c98"],
+ ", indicating all corresponding notations are types instead of operators. \
+For convenience and precision, the text that meaning creating a symbol ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalS]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b0880b1f-dbdf-4aef-b7e5-d55304aa19e8"],
+ " whose corresponding notation is ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "76ecd931-6afa-409d-aaf0-6eeee79500e4"],
+ "can and should be written in the form below."
+}], "DefinitionContinuation",
+ CellChangeTimes->{
+  3.8682323181262083`*^9, {3.8682323541825695`*^9, 3.8682325262710457`*^9}, {
+   3.868238913474305*^9, 3.868238920816665*^9}, {3.868318380491647*^9, 
+   3.868318485081114*^9}},ExpressionUUID->"2de53616-5ca8-4e24-a0db-\
+0db58aed34e9"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"\[ScriptCapitalS]", "\[Element]", 
+    RowBox[{"Ob", "(", 
+     RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], ")"}]}], "\[And]", 
+   RowBox[{
+    RowBox[{"\[ScriptV]", "(", "\[ScriptCapitalS]", ")"}], "\[Equal]", 
+    "\[ScriptCapitalN]"}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683184870783825`*^9, 3.868318503022979*^9}, {
+  3.8683185416254177`*^9, 3.8683185425916414`*^9}, {3.8683186702886157`*^9, 
+  3.8683187646323643`*^9}},ExpressionUUID->"400f508b-aae3-42d7-aa43-\
+78973ec0fda5"],
+
+Cell[TextData[{
+ "This should not be written using ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[ScriptCapitalS]", "=", 
+    RowBox[{
+     SuperscriptBox["\[ScriptV]", 
+      RowBox[{"-", "1"}]], "(", "\[ScriptCapitalN]", ")"}]}], 
+   TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "26196ac6-5243-4820-8bb0-a9b617b73926"],
+ " because if so, the must of ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{
+     SuperscriptBox["\[ScriptV]", 
+      RowBox[{"-", "1"}]], "(", "\[ScriptCapitalN]", ")"}], "\[Equal]", 
+    RowBox[{
+     SuperscriptBox["\[ScriptV]", 
+      RowBox[{"-", "1"}]], "(", "\[ScriptCapitalN]", ")"}]}], 
+   TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "eeab6003-bf85-4218-a491-3bbca0b13189"],
+ " disables the possibility to create another instance of ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "bb119148-64b5-462e-a673-7d8d0bad6c85"],
+ ", which is ridiculous. "
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.868318512702206*^9, 
+  3.8683186489848843`*^9}},ExpressionUUID->"7695be89-5aff-4bad-8c60-\
+10d51908f8df"],
+
+Cell[TextData[{
+ "Two brackets are thought to be ",
+ StyleBox["equal",
+  FontWeight->"Bold"],
+ " when the sequences of ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["t", "\[ScriptR]"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "d87445df-e926-4b2d-a1cd-630f4c355c22"],
+ ", sorted via the ordering of ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["t", "\[ScriptL]"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "2285f38e-a105-4930-acaf-60eed8278574"],
+ " are the same and this relationship constructs a equivalence morphism \
+between the two in the ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Bra", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "0d619d55-6892-49c2-978b-b2e17a4aa6d6"],
+ " category, noted as below:"
+}], "Text",
+ CellChangeTimes->{{3.868250808020584*^9, 3.868250895958893*^9}, {
+  3.868250945537876*^9, 3.868251043443243*^9}, {3.86825107843542*^9, 
+  3.8682510846976223`*^9}},ExpressionUUID->"65c88f13-79b1-425c-8bf7-\
+bde5736d313d"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Epsilon]", ":", 
+   RowBox[{"\[Alpha]", "\[Congruent]", "\[Beta]"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868251094484135*^9, 
+  3.8682511397252626`*^9}},ExpressionUUID->"262117b5-40f4-4ce6-8c96-\
+7d091118d2b8"],
+
+Cell[TextData[{
+ "A bracket, in order to enhance simplicity, can be wrapped into a symbol. \
+Therefore with these three definitions, how do we actually represent \
+mathematical stuff? One example is how to utilize them to express one of the \
+most basic mathematical concepts, such as a single number 12. To complete \
+this task, we may first define a notation Number and define a symbol ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalS]", "1"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b3134b6c-3a51-48cc-b6e2-0d5576f39460"],
+ " whose corresponding notation is Number. Then, how do we determine the \
+number is 12 instead of other numbers like 15? This can be solved using the \
+ordinal theory we presented before in the Preliminary section."
+}], "Text",
+ CellChangeTimes->{{3.8682325432188683`*^9, 3.868232695480607*^9}, {
+  3.8682327340675535`*^9, 3.8682328418921003`*^9}, {3.868251867956603*^9, 
+  3.868251869774414*^9}},ExpressionUUID->"5dc7a289-ab6d-4501-8555-\
+43385627de8b"],
+
+Cell[TextData[{
+ "To be more specific and to be accurate, in this system of mathematics, we \
+first need to construct an axiomatic set theory, for example, the \
+Zermelo-Fraenkel set system or we will always encounter the embarrassing \
+situations in the example above. To do this, first, we define a notation \
+called an item (annotated with ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalI]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5077f053-09f8-4fb7-95f7-2cb996254168"],
+ ") which serves as the parent of all other notations. The parameter count of \
+",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalI]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "08475f10-07d8-4c92-a896-99209e5bf784"],
+ " is zero so that it is a type."
+}], "Text",
+ CellChangeTimes->{{3.868232825826232*^9, 
+  3.868233034433989*^9}},ExpressionUUID->"53ec32fa-869a-4703-9d14-\
+ea7a62bf3851"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " A notation ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "fc30dd51-6c1e-4688-86a0-826220812758"],
+ " is called being ",
+ StyleBox["inherited",
+  FontWeight->"Bold"],
+ " from notation ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalM]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "8066024c-c3d3-4f2a-b554-0e78c003e754"],
+ " (or we say ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "416dcfeb-dda9-4d32-bd59-041dac23e96d"],
+ " is",
+ StyleBox[" a kind of",
+  FontWeight->"Bold"],
+ " ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalM]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "1727c74a-10be-4896-b29d-43ade31b20c4"],
+ ") when there exists such morphism between the two in ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "37650486-c117-4b4c-b4df-9a87bc2e0b71"],
+ ":"
+}], "Definition",
+ CellChangeTimes->{{3.8682330502611217`*^9, 3.8682331341138306`*^9}, {
+  3.8682331643825674`*^9, 3.868233166134467*^9}, {3.8682334108901043`*^9, 
+  3.8682334475326986`*^9}},ExpressionUUID->"14224502-fb0c-4958-8d38-\
+11d9c4247c84"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    RowBox[{"h", "\[Element]", 
+     RowBox[{"Mor", "(", 
+      RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}], ")"}]}], ":", " ", 
+    "\[ScriptCapitalM]"}], "\[Rule]", "\[ScriptCapitalN]"}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868233172668205*^9, 3.8682332006129827`*^9}, {
+  3.8682332622896514`*^9, 
+  3.868233267296853*^9}},ExpressionUUID->"a76064cf-89fe-4982-b015-\
+4bfb05412360"],
+
+Cell[TextData[{
+ "It is obviously without any ambiguity that ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[ForAll]", "\[ScriptCapitalM]"}], ",", 
+    RowBox[{"\[ScriptCapitalN]", "\[Element]", 
+     RowBox[{"Not", "(", "\[ScriptCapitalC]", ")"}]}], ",", 
+    RowBox[{"|", 
+     RowBox[{
+      SubscriptBox["Hom", "\[ScriptCapitalC]"], "(", 
+      RowBox[{"\[ScriptCapitalM]", ",", "\[ScriptCapitalN]"}], ")"}], "|", 
+     RowBox[{"\[Element]", 
+      RowBox[{"{", 
+       RowBox[{"0", ",", "1"}], "}"}]}]}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "f86a182f-391e-49c5-ac59-1931e6cffce6"],
+ ". Moreover, if ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "c2afce9c-6060-46c5-824a-6c4b31849e6b"],
+ " is a kind of ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalM]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "704d764f-0302-44ed-9e10-a63ab62ee8df"],
+ " then ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[ScriptP]", "(", "\[ScriptCapitalN]", ")"}], "\[GreaterEqual]", 
+    RowBox[{"\[ScriptP]", "(", "\[ScriptCapitalM]", ")"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "f6478750-bede-4972-b933-5a4fcc9a822c"],
+ ". For simplicity, ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "094aacf0-ca6b-44ee-8351-f23decc0121e"],
+ " is inherited from ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalM]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "8247fba2-d7a9-4f32-87e8-880e6aa677c3"],
+ " can be annotated as ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[ScriptCapitalN]", "\[LeftTriangleBar]", "\[ScriptCapitalM]"}], 
+   TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "0cd49e8b-ea13-452f-9676-f78f0aba2b74"],
+ "."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.8682332764769163`*^9, 3.868233405755909*^9}, {
+  3.8682334501802597`*^9, 3.868233588832083*^9}, {3.8682477481425943`*^9, 
+  3.868247795865441*^9}, {3.8682478842167807`*^9, 3.8682479038546324`*^9}, {
+  3.8682503342339535`*^9, 
+  3.8682503700463915`*^9}},ExpressionUUID->"df3c2711-176d-4f6b-828e-\
+04a1efcaeb02"],
+
+Cell[TextData[{
+ "Note that a symbol can be referenced to a bracket, just like the process \
+done below. Let ",
+ Cell[BoxData[
+  FormBox["\[EmptySet]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "3cba2236-bb32-4bff-9a72-df7c12d90feb"],
+ " be a kind of ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalI]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "8abf5f24-d32e-4d8e-adca-4842e6e04a69"],
+ ", which stands for the empty set. Then we declare ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalS]\[ScriptE]\[ScriptT]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "1bc5c6e6-d5a2-4c78-bb1a-ade161e64c7c"],
+ " as an infinite notation and significantly has ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+   "\[ScriptCapitalS]\[ScriptE]\[ScriptT]", "\[LeftTriangleBar]", 
+    "\[EmptySet]"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "ddb43044-0069-45d8-82b6-d8d128d046a2"],
+ ". They we define symbol ",
+ Cell[BoxData[
+  FormBox["0", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "a2a7860d-2db4-4954-8830-91173af09813"],
+ " from bracket ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"{", 
+    RowBox[{"(", 
+     RowBox[{"i", ",", "\[EmptySet]"}], ")"}], "}"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "80b46223-d55d-4347-a3db-65fcaf20df67"],
+ " where ",
+ Cell[BoxData[
+  FormBox["i", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "a333bd57-07be-4d65-a092-0842d807b73c"],
+ " is an arbitrary positive integer. Following the methods used to define \
+ordinals, we define symbol ",
+ Cell[BoxData[
+  FormBox["1", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "364c2a2d-352a-4b4b-83ca-62ce467c1ccd"],
+ " from bracket ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"i", ",", "\[ScriptCapitalS]\[ScriptE]\[ScriptT]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"j", ",", "\[EmptySet]"}], ")"}]}], "}"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e5c54507-a01b-42f6-b204-d82c412f77f5"],
+ " where ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"i", "<", "j"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "97004927-6de0-49f4-8251-cf9a79b0acd3"],
+ ". Furthermore, 2 is defined via ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", "\[EmptySet]", "}"}], ",", "\[EmptySet]"}], "}"}], 
+   TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "7f1e0ffa-45ce-481b-a8a2-6ce8f9b0d2cb"],
+ " to be ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"i", ",", "\[ScriptCapitalS]\[ScriptE]\[ScriptT]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"j", ",", "1"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"k", ",", "\[EmptySet]"}], ")"}]}], "}"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "19750090-4954-4c99-8604-ce3b70288984"],
+ " where ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"i", "<", "j", "<", "k"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "9f782403-1bbf-4e34-993c-2c12a0ed4c15"],
+ ". So on and so forth, all ordinals can be defined. Moreover, we define \
+symbols declared via brackets in this way ",
+ Cell[BoxData[
+  FormBox["Ordinals", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "54d346c8-2e2b-4fba-932c-85e90d2a8dc7"],
+ ", using notation ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalO]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "f54af64b-66ca-4623-9caf-27f183f2fec9"],
+ " (obviously a type) so that next time if we need to use an ordinal, it just \
+takes to instance ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"n", "\[Element]", 
+     RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}]}], "\[And]", 
+    RowBox[{
+     RowBox[{"\[ScriptV]", "(", "n", ")"}], "\[Equal]", 
+     "\[ScriptCapitalO]"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "fbcc7cd6-a05b-4665-beb2-849237651904"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.868233596672472*^9, 3.8682336038479805`*^9}, {
+   3.868233644371331*^9, 3.8682336757562585`*^9}, {3.8682374977567654`*^9, 
+   3.8682375012977924`*^9}, {3.8682378654114375`*^9, 3.868237875597723*^9}, {
+   3.8682380119354453`*^9, 3.868238054886468*^9}, 3.8682380949168897`*^9, {
+   3.8682381812045217`*^9, 3.868238181451659*^9}, {3.8682388947075443`*^9, 
+   3.8682389013537765`*^9}, {3.868239241128808*^9, 3.8682392494966435`*^9}, {
+   3.868250440976376*^9, 3.868250489218038*^9}, {3.8682505278074207`*^9, 
+   3.8682505308366327`*^9}, {3.8682506265674515`*^9, 3.868250691970333*^9}, {
+   3.8682507505915318`*^9, 3.8682507923241725`*^9}, {3.868251174283556*^9, 
+   3.8682512235325775`*^9}, {3.86825135246717*^9, 3.868251353756772*^9}, {
+   3.868251484652543*^9, 3.868251526768809*^9}, {3.8682515626841755`*^9, 
+   3.868251574767084*^9}, {3.8682516666642528`*^9, 3.8682516765664473`*^9}, {
+   3.8682518890748672`*^9, 3.868251997835495*^9}, {3.8682656547787704`*^9, 
+   3.868265749633725*^9}, {3.8682657829570723`*^9, 3.8682659707738743`*^9}, {
+   3.868318305915571*^9, 3.8683183391202*^9}, {3.868318940668356*^9, 
+   3.868318996699294*^9}},ExpressionUUID->"a45c1c7a-ae6e-41e0-a4c4-\
+37a63ed9626c"],
+
+Cell["\<\
+Utilizing the structure expressed with Bracket, Notation and Symbol, \
+mathematical statements can be accurately constructed. The example below \
+serves as a instance for this process.\
+\>", "Text",
+ CellChangeTimes->{{3.868319117683189*^9, 3.8683191291383934`*^9}, {
+  3.8683198578000154`*^9, 3.8683199137588577`*^9}, {3.86831996122478*^9, 
+  3.8683199800475893`*^9}},ExpressionUUID->"63bec7e5-5a3b-4a7d-a3aa-\
+40b1aabf61bb"],
+
+Cell[TextData[{
+ StyleBox["Example.",
+  FontWeight->"Bold"],
+ " Using the structure provided by Bracket, Notation and Symbol to construct \
+the example formula below, with meta category ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalC]", "1"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "de32554c-3796-4691-9af0-978f82d395f2"],
+ "."
+}], "Example",
+ CellChangeTimes->{{3.868319983304164*^9, 3.868320031353817*^9}, {
+  3.8683370085437007`*^9, 3.8683370168158555`*^9}, {3.8683374539521456`*^9, 
+  3.8683374565700436`*^9}},ExpressionUUID->"237e7c61-acca-4d84-96e6-\
+c438e9495a5f"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     UnderoverscriptBox["\[Sum]", 
+      RowBox[{"n", "=", "0"}], "\[Infinity]"], 
+     SuperscriptBox["x", "n"]}], "=", 
+    FractionBox["1", 
+     RowBox[{"1", "-", "x"}]]}], ",", " ", 
+   RowBox[{"for", " ", "|", "x", "|", 
+    RowBox[{"<", "1"}]}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683374600693073`*^9, 3.868337466187435*^9}, {
+  3.8683375201333637`*^9, 
+  3.868337548780285*^9}},ExpressionUUID->"c628358a-4db0-4d2e-a681-\
+026f1e6ddfad"],
+
+Cell[TextData[{
+ "First, we need to observe what notation is needed by the construction. \
+Apparently, we need to at least define these notations: ",
+ Cell[BoxData[
+  FormBox["infinity", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "68944cd9-6ed9-4873-a720-1224bb648670"],
+ ", ",
+ Cell[BoxData[
+  FormBox["integer", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "ab8124b6-c51e-4395-975e-fd5cd7bd3153"],
+ ", ",
+ Cell[BoxData[
+  FormBox["number", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "bee3a9d3-dc3e-4dca-bd72-62cdd91b39c1"],
+ ",",
+ StyleBox[" ",
+  FontSlant->"Italic"],
+ Cell[BoxData[
+  FormBox[
+   StyleBox["\[Sum]",
+    FontSlant->"Plain"], TraditionalForm]],
+  FormatType->"TraditionalForm",
+  FontSlant->"Italic",ExpressionUUID->"2f74e4c3-ede5-44fa-9e2c-986a84a904ff"],
+ ", ",
+ Cell[BoxData[
+  FormBox["=", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "547f5f04-0ce0-4b59-a01f-a49814ed2c07"],
+ ", ",
+ Cell[BoxData[
+  FormBox["^", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "ec36c125-cb3b-4c13-b9dd-6fb12993b5a5"],
+ ", ",
+ Cell[BoxData[
+  FormBox["/", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "df46aeec-d000-4074-8b34-f003872cb84a"],
+ ", ",
+ Cell[BoxData[
+  FormBox["-", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "36f1f7d4-33b7-42b2-b475-d8d6a11b86b7"],
+ ", ",
+ Cell[BoxData[
+  FormBox["abs", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "3dc90401-00e6-47f5-b45a-cfbb752711ce"],
+ ", ",
+ Cell[BoxData[
+  FormBox["<", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "7dd07c11-3fb0-4c95-b082-f2d7782a744a"],
+ " and ",
+ Cell[BoxData[
+  FormBox["for", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e2c50ab7-ee1f-44f2-b519-9a7780a78e95"],
+ ", where ",
+ Cell[BoxData[
+  FormBox["abs", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "814ebf3f-2273-4409-9aa8-4f1947a03442"],
+ " stands for the absolute value function. However, in this neat example, the \
+concept of function is not needed to be defined. Additionally, as the \
+constructed stuff only needs to demonstrate the equation itself instead of \
+the principles behind the equality, there is no necessity for the definition \
+of notation ",
+ Cell[BoxData[
+  FormBox["+", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "9bed64ce-1189-4b2f-852c-8d62582b642c"],
+ ". Note that manifestly ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"integer", " ", "\[LeftTriangleBar]", " ", "number"}], 
+   TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5fcb2e30-09fc-4735-8d46-97b23ce86def"],
+ ". The table below demonstrates the number of parameters taken by the \
+notations."
+}], "ExampleContinuation",
+ CellChangeTimes->{{3.868337562445593*^9, 3.8683376102296014`*^9}, {
+  3.8683377067890525`*^9, 3.8683378304656973`*^9}, {3.8683394350628543`*^9, 
+  3.8683394844329205`*^9}, {3.8683395188449807`*^9, 3.8683396994819803`*^9}, {
+  3.8683403659546566`*^9, 3.86834037170743*^9}, {3.868340609839609*^9, 
+  3.8683406184562855`*^9}, {3.868340697269967*^9, 
+  3.868340703045002*^9}},ExpressionUUID->"f6480e03-c8e7-4554-ba7d-\
+9a3e2c8ea3aa"],
+
+Cell[TextData[Cell[BoxData[GridBox[{
+   {
+    StyleBox["\[ScriptCapitalN]", "Equation"], 
+    StyleBox["integer", "Equation"], 
+    StyleBox["number", "Equation"], 
+    StyleBox["infinity", "Equation"], 
+    StyleBox["\[Sum]", "Equation"], 
+    StyleBox["=", "Equation"], 
+    StyleBox["/", "Equation"], 
+    StyleBox["-", "Equation"], 
+    StyleBox["abs", "Equation"], 
+    StyleBox["<", "Equation"], 
+    StyleBox["for", "Equation"]},
+   {
+    StyleBox[
+     RowBox[{"\[ScriptP]", 
+      RowBox[{"(", "\[ScriptCapitalN]", ")"}]}], "Equation"], 
+    StyleBox["0", "Equation"], 
+    StyleBox["0", "Equation"], 
+    StyleBox["0", "Equation"], 
+    StyleBox["3", "Equation"], 
+    StyleBox["2", "Equation"], 
+    StyleBox["2", "Equation"], 
+    StyleBox["2", "Equation"], 
+    StyleBox["1", "Equation"], 
+    StyleBox["2", "Equation"], 
+    StyleBox["2", "Equation"]}
+  },
+  GridBoxDividers->{
+   "Columns" -> {{True}}, 
+    "Rows" -> {{
+      True}}}]],ExpressionUUID->"6b7b0846-e138-4881-84c6-0c109dcb474c"]], \
+"Text",
+ CellChangeTimes->{{3.8683397491641803`*^9, 3.8683399499210653`*^9}, {
+  3.8683403372723427`*^9, 3.8683403425182657`*^9}, {3.868340710288705*^9, 
+  3.8683407181451106`*^9}},ExpressionUUID->"7c830bb2-2c11-400b-98bc-\
+90878d9daaea"],
+
+Cell[TextData[{
+ "Significantly there are three types and seven operators. In the \
+expressions, symbols are displayed bold for recognition from ordinals, \
+although this is actually not necessary. Bracket ",
+ Cell[BoxData[
+  FormBox["\[Alpha]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "2c056896-8cf3-4e14-a066-9cd28813ac90"],
+ " is the result of construction. Then just like constructing a polish \
+expression, we construct:"
+}], "ExampleContinuation",
+ CellChangeTimes->{{3.8683399666745996`*^9, 3.868340014672043*^9}, {
+  3.8683400710575824`*^9, 3.868340086278768*^9}, {3.8683403324900265`*^9, 
+  3.868340333703492*^9}, {3.8683407069238477`*^9, 3.868340707599122*^9}, {
+  3.8683407719489794`*^9, 3.8683408028732033`*^9}, {3.868341419464327*^9, 
+  3.8683414204405518`*^9}, {3.868341482952608*^9, 
+  3.868341492906983*^9}},ExpressionUUID->"9a79f7ff-33bb-49bd-ad5b-\
+1a44cf20f48b"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     StyleBox["1",
+      FontWeight->"Bold"], "\[Element]", 
+     RowBox[{"Ob", "(", 
+      RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], ")"}]}], "\[And]", 
+    RowBox[{"\[ScriptV]", "(", 
+     StyleBox["1",
+      FontWeight->"Bold"], ")"}]}], "=", "number"}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404153898745`*^9}, {
+  3.868340482734639*^9, 3.86834051156715*^9}, {3.8683407259899936`*^9, 
+  3.868340726004096*^9}},ExpressionUUID->"21c542d2-3948-4807-8942-\
+b985cc586bf4"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     StyleBox["\[Infinity]",
+      FontWeight->"Bold"], 
+     StyleBox["\[Element]",
+      FontWeight->"Plain"], 
+     StyleBox[
+      RowBox[{"Ob", "(", 
+       RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], ")"}],
+      FontWeight->"Plain"]}], 
+    StyleBox["\[And]",
+     FontWeight->"Plain"], 
+    RowBox[{
+     StyleBox["\[ScriptV]",
+      FontWeight->"Plain"], 
+     StyleBox["(",
+      FontWeight->"Plain"], 
+     StyleBox["\[Infinity]",
+      FontWeight->"Bold"], ")"}]}], "=", "infinity"}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404153898745`*^9}, {
+  3.868340482734639*^9, 3.86834051156715*^9}, {3.8683407259899936`*^9, 
+  3.868340768938795*^9}, {3.868340963005433*^9, 
+  3.868340963016368*^9}},ExpressionUUID->"424c083a-63f4-48a2-a72a-\
+93fc0384bf06"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     StyleBox["x",
+      FontWeight->"Bold"], 
+     StyleBox[
+      RowBox[{"\[Element]", 
+       RowBox[{"Ob", 
+        RowBox[{"(", 
+         RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], ")"}]}]}],
+      FontWeight->"Plain"]}], 
+    StyleBox["\[And]",
+     FontWeight->"Plain"], 
+    RowBox[{
+     StyleBox["\[ScriptV]",
+      FontWeight->"Plain"], 
+     StyleBox["(",
+      FontWeight->"Plain"], 
+     StyleBox["x",
+      FontWeight->"Bold"], 
+     StyleBox[")",
+      FontWeight->"Plain"]}]}], 
+   StyleBox["=",
+    FontWeight->"Plain"], 
+   StyleBox["number",
+    FontWeight->"Plain"]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404153898745`*^9}, {
+  3.868340482734639*^9, 3.86834051156715*^9}, {3.8683407259899936`*^9, 
+  3.868340768938795*^9}, {3.868340963005433*^9, 3.8683409829869556`*^9}, {
+  3.868341028387211*^9, 
+  3.868341028392443*^9}},ExpressionUUID->"42df3670-e96c-4120-ae6f-\
+fee13b66ad26"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     StyleBox["n",
+      FontWeight->"Bold"], 
+     StyleBox["\[Element]",
+      FontWeight->"Plain"], 
+     StyleBox[
+      RowBox[{"Ob", "(", 
+       RowBox[{"Sym", "(", "\[ScriptCapitalC]", ")"}], ")"}],
+      FontWeight->"Plain"]}], 
+    StyleBox["\[And]",
+     FontWeight->"Plain"], 
+    RowBox[{
+     StyleBox["\[ScriptV]",
+      FontWeight->"Plain"], 
+     StyleBox["(",
+      FontWeight->"Plain"], 
+     StyleBox["n",
+      FontWeight->"Bold"], ")"}]}], "=", 
+   RowBox[{"integer", "\[LeftTriangleBar]", "number"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404153898745`*^9}, {
+  3.868340482734639*^9, 3.86834051156715*^9}, {3.8683407259899936`*^9, 
+  3.868340768938795*^9}, {3.868340963005433*^9, 3.8683409829869556`*^9}, {
+  3.868341028387211*^9, 
+  3.8683410682675085`*^9}},ExpressionUUID->"76ccb832-ba06-4496-9840-\
+814d54f85260"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Alpha]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "for"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", "\[Beta]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", "\[Gamma]"}], ")"}]}], "}"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+   3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+   3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404153898745`*^9}, 
+   3.868340482734639*^9},ExpressionUUID->"21ecaed4-aabd-4549-9e21-\
+ee583a923cb9"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Beta]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "="}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", "\[Delta]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", "\[Epsilon]"}], ")"}]}], "}"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 
+  3.868340450015072*^9}},ExpressionUUID->"7db075cd-519b-43c9-b063-\
+9c020f3b2995"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Gamma]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "<"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", "\[Zeta]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", 
+       StyleBox["1",
+        FontWeight->"Bold"]}], ")"}]}], "}"}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404745099382`*^9}, {
+  3.868340522049369*^9, 
+  3.8683405528637595`*^9}},ExpressionUUID->"389e2854-662b-4af5-9b87-\
+579269ae582b"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Delta]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "\[Sum]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", "\[Eta]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", 
+       StyleBox["\[Infinity]",
+        FontWeight->"Bold"]}], ")"}], ",", " ", 
+     RowBox[{"(", 
+      RowBox[{"3", ",", "\[Theta]"}], ")"}]}], "}"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404745099382`*^9}, {
+  3.868340522049369*^9, 3.86834059914894*^9}, {3.8683408103206115`*^9, 
+  3.868340837452182*^9}},ExpressionUUID->"e2a083b1-d90d-4ed5-9f46-\
+e9302209a49f"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Epsilon]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "/"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", 
+       StyleBox["1",
+        FontWeight->"Bold"]}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", "\[Iota]"}], ")"}]}], "}"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404745099382`*^9}, {
+  3.868340522049369*^9, 3.86834059914894*^9}, {3.8683408103206115`*^9, 
+  3.86834089290965*^9}, {3.868341115763432*^9, 
+  3.86834111680203*^9}},ExpressionUUID->"87263e15-9902-42f9-8b63-\
+bc243d3c3d3b"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Zeta]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "abs"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", 
+       StyleBox["x",
+        FontWeight->"Bold"]}], ")"}]}], "}"}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404745099382`*^9}, {
+  3.868340522049369*^9, 3.86834059914894*^9}, {3.8683408103206115`*^9, 
+  3.868340904211709*^9}, {3.868340948633159*^9, 3.8683409599147387`*^9}, {
+  3.8683409979999514`*^9, 
+  3.868340998005953*^9}},ExpressionUUID->"3ea9cde0-9c76-4ab9-a2a7-\
+4b963f9605f2"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Eta]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "="}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", 
+       StyleBox["n",
+        FontWeight->"Bold"]}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", 
+       StyleBox["1",
+        FontWeight->"Bold"]}], 
+      StyleBox[")",
+       FontWeight->"Bold"]}]}], 
+    StyleBox["}",
+     FontWeight->"Bold"]}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404745099382`*^9}, {
+  3.868340522049369*^9, 3.86834059914894*^9}, {3.8683408103206115`*^9, 
+  3.868340904211709*^9}, {3.868340948633159*^9, 3.8683409599147387`*^9}, {
+  3.8683409979999514`*^9, 3.868341023233141*^9}, {3.8683410746345396`*^9, 
+  3.868341082861734*^9}},ExpressionUUID->"c6935c05-d71b-4d3e-9fbe-\
+753b02531d0f"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Theta]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "^"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", 
+       StyleBox["x",
+        FontWeight->"Bold"]}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", 
+       StyleBox["n",
+        FontWeight->"Bold"]}], ")"}]}], "}"}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404745099382`*^9}, {
+  3.868340522049369*^9, 3.86834059914894*^9}, {3.8683408103206115`*^9, 
+  3.868340904211709*^9}, {3.868340948633159*^9, 3.8683409599147387`*^9}, {
+  3.8683409979999514`*^9, 3.868341023233141*^9}, {3.8683410746345396`*^9, 
+  3.8683411125192795`*^9}},ExpressionUUID->"6d056f2c-3125-48f7-9d9e-\
+156d3372a53d"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Iota]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "-"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", 
+       StyleBox["1",
+        FontWeight->"Bold"]}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", 
+       StyleBox["x",
+        FontWeight->"Bold"]}], ")"}]}], "}"}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8683401000034122`*^9, 3.868340157994915*^9}, {
+  3.8683401957797775`*^9, 3.868340233454008*^9}, {3.8683403142256837`*^9, 
+  3.8683403172886815`*^9}, {3.8683403828579073`*^9, 3.8683404745099382`*^9}, {
+  3.868340522049369*^9, 3.86834059914894*^9}, {3.8683408103206115`*^9, 
+  3.868340904211709*^9}, {3.868340948633159*^9, 3.8683409599147387`*^9}, {
+  3.8683409979999514`*^9, 3.868341023233141*^9}, {3.8683410746345396`*^9, 
+  3.868341159862602*^9}},ExpressionUUID->"886e9958-42d1-4379-8cf5-\
+55921fa20892"],
+
+Cell[TextData[{
+ "This may look a bit messy but nevertheless we can combine the simple \
+brackets together and form larger brackets in the form shown as below. \
+Declaration of the four symbols are omitted. Bracket ",
+ Cell[BoxData[
+  FormBox["\[Alpha]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e2fe405f-6472-4c09-94b4-1b7988922ac8"],
+ " is the result of construction."
+}], "ExampleContinuation",
+ CellChangeTimes->{{3.8683413279984255`*^9, 3.8683413648998623`*^9}, {
+  3.868341399456406*^9, 3.8683414033435416`*^9}, {3.868341442620336*^9, 
+  3.868341508249393*^9}, {3.868341565914811*^9, 
+  3.868341571013397*^9}},ExpressionUUID->"a6d3f293-a077-453e-bb93-\
+17c5f1e2195e"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Alpha]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "for"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", "\[Beta]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"0", ",", "<"}], ")"}], ",", 
+         RowBox[{"(", 
+          RowBox[{"1", ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"(", 
+              RowBox[{"0", ",", "abs"}], ")"}], ",", 
+             RowBox[{"(", 
+              RowBox[{"1", ",", 
+               StyleBox["x",
+                FontWeight->"Bold"]}], ")"}]}], "}"}]}], ")"}], ",", 
+         RowBox[{"(", 
+          RowBox[{"2", ",", 
+           StyleBox["1",
+            FontWeight->"Bold"]}], ")"}]}], "}"}]}], ")"}]}], "}"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868341667390833*^9, 
+  3.86834168550177*^9}},ExpressionUUID->"95f5673b-8a8b-4a5f-9cbb-\
+65f56c7dcd3d"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Beta]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "="}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", "\[Delta]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"0", ",", "/"}], ")"}], ",", 
+         RowBox[{"(", 
+          RowBox[{"1", ",", 
+           StyleBox["1",
+            FontWeight->"Bold"]}], ")"}], ",", 
+         RowBox[{"(", 
+          RowBox[{"2", ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"(", 
+              RowBox[{"0", ",", "-"}], ")"}], ",", 
+             RowBox[{"(", 
+              RowBox[{"1", ",", 
+               StyleBox["1",
+                FontWeight->"Bold"]}], ")"}], ",", 
+             RowBox[{"(", 
+              RowBox[{"2", ",", 
+               StyleBox["x",
+                FontWeight->"Bold"]}], ")"}]}], "}"}]}], ")"}]}], "}"}]}], 
+      ")"}]}], "}"}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868341635936901*^9, 
+  3.868341656584221*^9}},ExpressionUUID->"0071b936-65f7-4f77-8c06-\
+930747d44ebe"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Delta]", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "\[Sum]"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"0", ",", "="}], ")"}], ",", 
+         RowBox[{"(", 
+          RowBox[{"1", ",", 
+           StyleBox["n",
+            FontWeight->"Bold"]}], ")"}], ",", 
+         RowBox[{"(", 
+          RowBox[{"2", ",", 
+           StyleBox["1",
+            FontWeight->"Bold"]}], 
+          StyleBox[")",
+           FontWeight->"Bold"]}]}], 
+        StyleBox["}",
+         FontWeight->"Bold"]}]}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", 
+       StyleBox["\[Infinity]",
+        FontWeight->"Bold"]}], ")"}], ",", " ", 
+     RowBox[{"(", 
+      RowBox[{"3", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"(", 
+          RowBox[{"0", ",", "^"}], ")"}], ",", 
+         RowBox[{"(", 
+          RowBox[{"1", ",", 
+           StyleBox["x",
+            FontWeight->"Bold"]}], ")"}], ",", 
+         RowBox[{"(", 
+          RowBox[{"2", ",", 
+           StyleBox["n",
+            FontWeight->"Bold"]}], ")"}]}], "}"}]}], ")"}]}], "}"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868341513881538*^9, 
+  3.868341615848016*^9}},ExpressionUUID->"b9e8bed7-606f-4e31-8c24-\
+a83dd3061a15"],
+
+Cell[TextData[{
+ "It is still possible to combine all into a large bracket definition for ",
+ Cell[BoxData[
+  FormBox["\[Alpha]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "eaa3677c-8080-42a2-93dd-9b0ecfc29719"],
+ " but in that way it may be even harder for people to understand, although \
+altogether no difference for algorithms and programs. (The example ends here.)"
+}], "ExampleContinuation",
+ CellChangeTimes->{{3.868341513881538*^9, 3.8683416158326335`*^9}, {
+  3.86834169005317*^9, 
+  3.868341787826007*^9}},ExpressionUUID->"4ada6b5d-4ce7-428d-8cf1-\
+e8d407461c4c"],
+
+Cell[TextData[{
+ "Another issue is about the recognition between majorly two types of \
+brackets: the type of bracket that purely serves as a brick for constructing \
+mathematical expressions and the type of bracket that forms the thing that \
+former mathematics call them statements (for instance, ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "="}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", "x"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", "y"}], ")"}]}], "}"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "dd53fe82-6258-433d-bef0-07ee4fe4d5c3"],
+ " or the expression for the Pythagorean theorem). In this system for \
+representation, the second sort of bracket is called ",
+ StyleBox["micro-statements",
+  FontWeight->"Bold"],
+ ", whose precise definition comes below."
+}], "Text",
+ CellChangeTimes->{{3.868341797493665*^9, 
+  3.8683420158250713`*^9}},ExpressionUUID->"76cbdd43-0a30-40e5-ba19-\
+60bafeb53846"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " A micro-statement is a defined as an object in ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Bra", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  ExpressionUUID->"86c1caea-d8e4-494b-994f-58d1477277ef"],
+ " whose notation ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalN]", TraditionalForm]],ExpressionUUID->
+  "dc8aa808-3a74-4f63-918d-aa324fac1203"],
+ " has ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[ScriptP]", "(", "\[ScriptCapitalN]", ")"}], "=", "2"}], 
+   TraditionalForm]],ExpressionUUID->"e9d3a0ee-63f0-419b-a181-91a5cdb7dcb0"],
+ " and can be evaluated into a Boolean."
+}], "Definition",
+ CellChangeTimes->{{3.8683420212215767`*^9, 3.868342100960392*^9}, {
+  3.868342192397208*^9, 
+  3.86834222784851*^9}},ExpressionUUID->"36aecc57-5a5f-48fe-ac46-\
+9681b4698731"],
+
+Cell[TextData[{
+ "It is essential to pay attention to that a bracket with 2-parameter \
+notation is not necessarily a micro-statement. This conclusion can be \
+illustrated via the example of ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"0", ",", "+"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"1", ",", "x"}], ")"}], ",", 
+     RowBox[{"(", 
+      RowBox[{"2", ",", "y"}], ")"}]}], "}"}], TraditionalForm]],
+  ExpressionUUID->"20bd7896-13d5-4659-ae9c-0abb4ddffefc"],
+ " whose notation has two symbols as parameters but is not a micro-statement. \
+The second restriction is more important, which is that a micro-statement \
+must have the capacity to be evaluated into a Boolean value, that is, ",
+ Cell[BoxData[
+  FormBox["true", TraditionalForm]],ExpressionUUID->
+  "46ffa114-e4a5-4708-80b4-aa85f67f1038"],
+ " or ",
+ Cell[BoxData[
+  FormBox["false", TraditionalForm]],ExpressionUUID->
+  "beea02bd-a4dd-4c4b-b09f-7a3e2f891e46"],
+ ". What is notable, the ",
+ StyleBox["evaluation",
+  FontWeight->"Bold"],
+ " process is not declared inside the representation system, whose definition \
+comes below. All micro-statement brackets forms the ",
+ StyleBox["Micro-Statement ",
+  FontWeight->"Bold"],
+ "sub category of ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Bra", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  ExpressionUUID->"1975c5e7-ca5c-470e-8842-7e2ddad70ae2"],
+ " and is annotated as ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Mic", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  ExpressionUUID->"4fa8a245-8d15-42c0-97e3-9423558f55da"],
+ "."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.8683421059375553`*^9, 3.8683421902438507`*^9}, {
+  3.868342222010269*^9, 3.868342286776765*^9}, {3.8683423598135347`*^9, 
+  3.868342419626927*^9}, {3.8683424727421155`*^9, 3.8683425096544704`*^9}, {
+  3.868343302465885*^9, 
+  3.8683433326003895`*^9}},ExpressionUUID->"ac221d89-c0b0-449e-9d17-\
+3775f1758b5b"]
+}, Open  ]],
+
+Cell["\<\
+Briefly, an evaluation can be understood by imaging a map which takes a \
+micro-statement bracket and sends a Boolean value as output. The exact \
+declaration is:\
+\>", "Text",
+ CellChangeTimes->{{3.868342430979246*^9, 3.868342470079159*^9}, {
+  3.8683432953964014`*^9, 3.8683432986226234`*^9}, {3.868343336951206*^9, 
+  3.868343350121866*^9}, {3.868343634291247*^9, 
+  3.8683436391989107`*^9}},ExpressionUUID->"bf4c2a74-7ebf-4d75-80aa-\
+2e686af40161"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " An evaluation is a morphism from ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Mic", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e7b3ac5c-4d66-4293-82c6-2f1431ea2306"],
+ " to a Boolean algebra ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalB]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "a2dc1534-373f-4505-b9b6-e56699136cba"],
+ " with the form below."
+}], "Definition",
+ CellChangeTimes->{{3.8683436506536245`*^9, 3.868343668043291*^9}, {
+  3.8683437805872574`*^9, 3.8683438069283*^9}, {3.868343947854967*^9, 
+  3.8683439602682405`*^9}, {3.868344136301341*^9, 3.8683441521725936`*^9}, {
+  3.8683442429670963`*^9, 
+  3.8683442476702776`*^9}},ExpressionUUID->"18e04457-55db-4095-a332-\
+134b8050a33e"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"\[ScriptE]\[ScriptV]\[ScriptA]\[ScriptL]", ":", 
+    RowBox[{"Ob", "(", 
+     RowBox[{"Mic", "(", "\[ScriptCapitalC]", ")"}], ")"}]}], "\[Rule]", 
+   "\[ScriptCapitalB]"}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868343826755175*^9, 3.868343857269611*^9}, {
+  3.8683439939515405`*^9, 
+  3.86834399656184*^9}},ExpressionUUID->"7877f518-d1fe-48d8-840f-\
+b1f1a51c7faf"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[ScriptM]", 
+   OverscriptBox["\[Function]", "\[ScriptE]\[ScriptV]\[ScriptA]\[ScriptL]"], 
+   RowBox[{
+   "\[ScriptE]\[ScriptV]\[ScriptA]\[ScriptL]", "(", "\[ScriptM]", ")"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868343826755175*^9, 3.868343857269611*^9}, {
+  3.8683439939515405`*^9, 
+  3.8683440447443433`*^9}},ExpressionUUID->"b4bbc75c-eefc-40e5-af34-\
+8cdcc866f236"],
+
+Cell[TextData[{
+ "The Boolean value ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{
+    "\[ScriptE]\[ScriptV]\[ScriptA]\[ScriptL]", "(", "\[ScriptM]", ")"}], 
+    "\[Element]", 
+    RowBox[{"{", 
+     RowBox[{"0", ",", "1"}], "}"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "f696e725-48d3-412c-8e59-aa58df8f4f06"],
+ " is called the ",
+ StyleBox["evaluation result",
+  FontWeight->"Bold"],
+ " of micro-statement. If for bracket ",
+ Cell[BoxData[
+  FormBox["\[ScriptM]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "792d8e77-aa25-4dba-a308-8c6b8b9c8cbc"],
+ " exists a morphism to ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalB]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "1e5db7df-622c-4c59-a7b8-25f063529c44"],
+ " that satisfies the definition of evaluation, then we say that ",
+ Cell[BoxData[
+  FormBox["\[ScriptM]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "0e7e1827-1582-43cb-9821-e924702eeeee"],
+ " is ",
+ StyleBox["evaluatable",
+  FontWeight->"Bold"],
+ ". That is, if it satisfies the first restriction of being a micro-statement \
+as well, it is a micro-statement."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.868344073154047*^9, 3.8683441223415203`*^9}, {
+  3.8683441574429364`*^9, 
+  3.8683442396247516`*^9}},ExpressionUUID->"ce217cca-d2f9-403a-ac38-\
+a5bf73c088fd"],
+
+Cell["\<\
+The concept of micro-statements are widely and crucially used in the forth \
+section of this paper in the discussion on how to manipulate the data \
+structures described in this section for derivation later.\
+\>", "Text",
+ CellChangeTimes->{{3.8683442555694394`*^9, 3.8683443960395594`*^9}, {
+  3.868344453219554*^9, 
+  3.868344455252289*^9}},ExpressionUUID->"e4964fbe-370f-4f9a-b385-\
+956b113ebfbb"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["The Standardized Principles for Derivation of Statements", "Section",
+ CellChangeTimes->{{3.86834447793757*^9, 
+  3.8683445025083365`*^9}},ExpressionUUID->"becadd6c-c79d-4bea-93e8-\
+306b8e1193dd"],
+
+Cell["\<\
+From the discussion above in the second section, we know that a mathematical \
+statement can be broken into micro-statements, which are a special sort of \
+brackets.\
+\>", "Text",
+ CellChangeTimes->{{3.8684062627367616`*^9, 3.868406269375576*^9}, {
+  3.868420690785966*^9, 3.868420697163732*^9}, {3.868426256985606*^9, 
+  3.868426280274788*^9}, {3.86842805870796*^9, 3.8684280590129313`*^9}, {
+  3.868428108746401*^9, 
+  3.8684281112765627`*^9}},ExpressionUUID->"3b886f9a-fdfb-4363-8966-\
+c7670f709db2"],
+
+Cell[TextData[{
+ "The discussion below calls the ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Mic", "(", "\[ScriptCapitalC]", ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "13542463-0588-4ffa-bf67-103f687a7740"],
+ " category the ",
+ StyleBox["micro-statement pool",
+  FontWeight->"Bold"],
+ ", or ",
+ StyleBox["pool",
+  FontWeight->"Bold"],
+ " for short. The morphisms inside the micro-statements pool are declared for \
+representation of implication relationships. It is obvious are elementary \
+that,"
+}], "Text",
+ CellChangeTimes->{{3.8684281138522587`*^9, 3.8684281500408063`*^9}, {
+  3.868428608675727*^9, 3.8684286633779955`*^9}, {3.8684297945603676`*^9, 
+  3.8684298055140314`*^9}},ExpressionUUID->"b814bf15-3239-4f54-b5da-\
+58b9158e14d1"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"\[ForAll]", "\[Alpha]"}], ",", 
+   RowBox[{"\[Beta]", "\[Element]", 
+    RowBox[{"Ob", "(", 
+     RowBox[{"Mic", "(", "\[ScriptCapitalC]", ")"}], ")"}]}], ",", " ", 
+   RowBox[{
+    RowBox[{"\[ForAll]", 
+     RowBox[{"|", 
+      RowBox[{
+       SubscriptBox["Hom", 
+        RowBox[{"Mic", "(", "\[ScriptCapitalC]", ")"}]], "(", 
+       RowBox[{"\[Alpha]", ",", "\[Beta]"}], ")"}], "|"}]}], "=", "1"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868428666910391*^9, 
+  3.8684287290105066`*^9}},ExpressionUUID->"7e17d103-84a4-4996-a089-\
+0b9c12699391"],
+
+Cell[TextData[{
+ "Since for each micro-statement ",
+ Cell[BoxData[
+  FormBox["\[Alpha]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "7d102b43-1748-41d8-9441-c15cf79c8836"],
+ " and ",
+ Cell[BoxData[
+  FormBox["\[Beta]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "ba85cb71-a53e-4c55-ab62-69457402b5d4"],
+ ", we only need one arrow for derivation ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Alpha]", "\[Implies]", "\[Beta]"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "05a52157-f01d-41a8-b17d-7e794e0b2cc5"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.8684287400491905`*^9, 3.8684287999334946`*^9}, {
+  3.868428846233666*^9, 
+  3.8684288503890114`*^9}},ExpressionUUID->"99bc6f53-6879-48db-82ca-\
+33baac4f8f17"],
+
+Cell["\<\
+The basic insight of the entire derivation process is defined below.\
+\>", "Text",
+ CellChangeTimes->{{3.8684287400491905`*^9, 3.8684287999334946`*^9}, {
+  3.868428846233666*^9, 3.8684288552781277`*^9}, {3.868428897735241*^9, 
+  3.868428954092176*^9}},ExpressionUUID->"97d06bff-3212-4443-ab55-\
+aa37969574c1"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " A ",
+ StyleBox["derivation",
+  FontWeight->"Bold"],
+ " is a set of ordered pairs of ordinals and categories in the form below. "
+}], "Definition",
+ CellChangeTimes->{{3.868428959857368*^9, 3.8684289860771904`*^9}, {
+  3.8684291168149376`*^9, 
+  3.8684291312353964`*^9}},ExpressionUUID->"5e4dce2c-b32a-4115-8dfa-\
+898b371b142e"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[ScriptCapitalD]", ":=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"i", ",", 
+       SubscriptBox["\[ScriptCapitalM]", "i"]}], ")"}], "|", 
+     RowBox[{"i", "\[Element]", 
+      SubscriptBox["On", 
+       RowBox[{"\[GreaterEqual]", "1"}]]}]}], "}"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8684291400732107`*^9, 3.8684291457583523`*^9}, {
+  3.86842922112089*^9, 3.868429246496223*^9}, {3.868429277942704*^9, 
+  3.8684293246240706`*^9}},ExpressionUUID->"5925d6ca-b587-46dd-992c-\
+2b5d2b30bfd9"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Where ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalM]", "i"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b70bf1fb-3f0e-4779-9c37-e46832db29b3"],
+ "  is a micro-statement pool and for each element in ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalD]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "addbbf2e-5816-4ff9-ace7-653cc38adfc1"],
+ ", its left pair element is a unique ordinal. The \[ScriptCapitalD] set is \
+well-ordered following the sort of ",
+ Cell[BoxData[
+  FormBox["i", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "cce4d11c-a467-49bf-acc7-ac3d34c3e640"],
+ ". On the beginning, the the initial pool equals to the condition, that is \
+the micro-statements given by the problem. On the other hand, the conclusions \
+of the proof problem, to be proved via some steps form a set ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalR]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "d3208700-af5e-48ce-8a64-27fcf5c32126"],
+ ", called the ",
+ StyleBox["requirement set",
+  FontWeight->"Bold"],
+ " are to be inferred to exist inside the micro-statement pool."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.868429299065727*^9, 3.8684293878385773`*^9}, {
+   3.868429439348008*^9, 3.8684294611319466`*^9}, 3.8684294978620586`*^9, {
+   3.868429734328022*^9, 3.8684298807185125`*^9}, {3.8684299253424225`*^9, 
+   3.868430035347857*^9}, {3.8684307777198763`*^9, 3.8684307786415052`*^9}, {
+   3.8684334107803464`*^9, 3.868433410786296*^9}, {3.868433905692343*^9, 
+   3.8684342359656463`*^9}, {3.868434431355164*^9, 
+   3.868434472550747*^9}},ExpressionUUID->"482d46ff-6372-4b7c-962e-\
+b1757ca68654"],
+
+Cell[TextData[{
+ "For simplicity of expression, we use notation ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalM]", "i"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "f7330b78-b054-492b-a88e-05982ef88729"],
+ " to represent the right pair element in \[ScriptCapitalD]  whose left \
+companion is ",
+ Cell[BoxData[
+  FormBox["i", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "97bc35b2-c3f5-4789-b8a2-e6f96a046464"],
+ "."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.868429299065727*^9, 3.8684293878385773`*^9}, {
+   3.868429439348008*^9, 3.8684294611319466`*^9}, 3.8684294978620586`*^9, {
+   3.868429734328022*^9, 3.8684298807185125`*^9}, {3.8684299253424225`*^9, 
+   3.868430035347857*^9}, {3.8684307777198763`*^9, 3.8684307786415052`*^9}, {
+   3.8684334118069*^9, 
+   3.868433463995846*^9}},ExpressionUUID->"66d54a18-d7c6-425d-8dd8-\
+10e5b151ca7c"]
+}, Open  ]],
+
+Cell["\<\
+The detailed explanation of derivation, illustrating how the algorithm works \
+from the ground up is defined below.\
+\>", "Text",
+ CellChangeTimes->{{3.8684294160796175`*^9, 3.868429436557551*^9}, {
+   3.8684301142910056`*^9, 3.868430134031145*^9}, {3.868430246133213*^9, 
+   3.868430329333664*^9}, {3.868430409435031*^9, 3.868430437858384*^9}, {
+   3.8684304929183345`*^9, 3.8684305419319*^9}, 
+   3.8684342666015806`*^9},ExpressionUUID->"5ff3c94d-3576-4293-a06a-\
+7b0e7be5acb1"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " A ",
+ StyleBox["step of derivation",
+  FontWeight->"Bold"],
+ " is a map existed on the derivation set ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalD]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b7c42d3b-a825-4f68-b257-b3633f65df07"],
+ ", mapping from a pair to another, whose ordinal increases by ",
+ Cell[BoxData[
+  FormBox["1", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "17145937-af56-40b6-bb9a-a7889b8d3518"],
+ ". This map is annotated using script word ",
+ Cell[BoxData[
+  FormBox["\[ScriptS]\[ScriptT]\[ScriptE]\[ScriptP]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "4066d240-5493-4c91-95ae-52eb8ae466fe"],
+ ". The form is shown below:"
+}], "Definition",
+ CellChangeTimes->{{3.8684305490133505`*^9, 
+  3.868430758974852*^9}},ExpressionUUID->"25490302-8750-449a-88d3-\
+885dcc472e3e"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{"i", ",", 
+     SubscriptBox["\[ScriptCapitalM]", "i"]}], ")"}], 
+   OverscriptBox["\[Function]", "\[ScriptS]\[ScriptT]\[ScriptE]\[ScriptP]"], 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"i", "+", "1"}], ",", 
+     SubscriptBox["\[ScriptCapitalM]", 
+      RowBox[{"i", "+", "1"}]]}], ")"}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8684300425264835`*^9, 3.8684300908038015`*^9}, {
+  3.8684307892219048`*^9, 
+  3.8684307983594847`*^9}},ExpressionUUID->"91092dfa-ef9e-4545-b081-\
+ed132f4c107f"],
+
+Cell[TextData[{
+ "Inside the map, the left pair element is simply self-increased and the \
+right pair element is processed by a functor (since the item to process is a \
+category) called the ",
+ StyleBox["recurse functor",
+  FontWeight->"Bold"],
+ " noted as ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalF]", "i"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5fa070a3-384d-4d02-983a-4f6a7df7d62c"],
+ ". That is,"
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.868430812178832*^9, 
+  3.8684309092265177`*^9}},ExpressionUUID->"a6199344-9078-451a-a3d6-\
+bea710d8d990"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   SubscriptBox["\[ScriptCapitalM]", 
+    RowBox[{"i", "+", "1"}]], "=", 
+   RowBox[{
+    SubscriptBox["\[ScriptCapitalF]", "i"], 
+    SubscriptBox["\[ScriptCapitalM]", "i"]}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868430913083892*^9, 
+  3.868430933570985*^9}},ExpressionUUID->"46827424-5b4d-4b20-aa80-\
+1cb343f011a2"],
+
+Cell["\<\
+The termination condition for the proof automation process is described below \
+as an evaluatable statement. \
+\>", "Text",
+ CellChangeTimes->{{3.868430965933789*^9, 3.8684309977980824`*^9}, {
+   3.8684311309648433`*^9, 3.868431184508054*^9}, {3.8684325930135984`*^9, 
+   3.8684326083132734`*^9}, {3.868432655243394*^9, 3.868432664967633*^9}, {
+   3.8684329063105083`*^9, 3.8684329097258015`*^9}, {3.868433022495267*^9, 
+   3.868433077898337*^9}, {3.8684342972973022`*^9, 3.8684343370992975`*^9}, 
+   3.8684344849995985`*^9},ExpressionUUID->"9f5373dc-bf10-4d36-94ba-\
+e80b20458b74"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " A derivation set is thought to be ",
+ StyleBox["successful",
+  FontWeight->"Bold"],
+ " when the condition below is satisfied when the condition below is true:"
+}], "Definition",
+ CellChangeTimes->{{3.8684330893747587`*^9, 3.868433121535742*^9}, {
+  3.8684331738982353`*^9, 3.868433188634557*^9}, {3.8684332440936937`*^9, 
+  3.868433279333065*^9}, {3.868433316896098*^9, 
+  3.868433357776532*^9}},ExpressionUUID->"9dd84805-95d7-44d8-aaf5-\
+b6d0ad2d9cf5"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    RowBox[{"\[Exists]", 
+     RowBox[{"n", "\[Element]", 
+      RowBox[{"[", 
+       RowBox[{"0", ",", "\[Omega]"}]}]}]}], ")"}], ",", " ", 
+   RowBox[{"\[ScriptCapitalR]", "\[SubsetEqual]", 
+    RowBox[{"Ob", "(", 
+     SubscriptBox["\[ScriptCapitalM]", "n"], ")"}]}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8684333732769175`*^9, 3.8684334033068476`*^9}, {
+  3.8684335425522127`*^9, 3.868433556027355*^9}, {3.8684335997453103`*^9, 
+  3.868433609627575*^9}, {3.8684343451539154`*^9, 3.8684343808180904`*^9}, {
+  3.868434594417347*^9, 
+  3.868434601860161*^9}},ExpressionUUID->"e3784f8f-a113-4968-b1d6-\
+f22d71834e68"],
+
+Cell[TextData[{
+ "On the other hand, a derivation set is thought to be ",
+ StyleBox["impossible",
+  FontWeight->"Bold"],
+ " when there does not exist such a ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"n", "\[Element]", 
+     RowBox[{"[", 
+      RowBox[{"0", ",", "\[Omega]"}]}]}], ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e8242a88-cc1f-47e0-aa4b-05e6c90a4ec7"],
+ " that makes the requirement set a subset of the object set of the targeted \
+micro-statement pool."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.8684345596259155`*^9, 
+  3.868434661852114*^9}},ExpressionUUID->"9ba92af1-1b6a-4bed-b93a-\
+8bbab114e448"],
+
+Cell["\<\
+It should be noted that the impossibility detection of a derivation set, \
+although is mathematically well-defined, is not actually applicable to being \
+implemented in the algorithm because a computing algorithm\[CloseCurlyQuote]s \
+calculation and derivation time is limited, just like \
+Turing\[CloseCurlyQuote]s halting problem, cannot be judged. Then we \
+investigate into the execution of the recurse functor, which is significantly \
+the core part that performs the proving process.\
+\>", "Text",
+ CellChangeTimes->{{3.8684348709724054`*^9, 3.8684349541302423`*^9}, {
+  3.8684349924681487`*^9, 3.86843510882897*^9}, {3.86843515666984*^9, 
+  3.8684351624728374`*^9}, {3.8684352059390545`*^9, 
+  3.86843530992655*^9}},ExpressionUUID->"84b28cbc-c37b-4ffe-90be-\
+1b1484b57c3e"],
+
+Cell[TextData[{
+ "Another notable issue about the recurse functors is that in order to reduce \
+stubbornness, the functors are impure is there is no global variable. To \
+solve this problem, we utilize the ",
+ Cell[BoxData[
+  FormBox["\[ScriptR]", TraditionalForm]],ExpressionUUID->
+  "9dfdae32-0262-45f6-96e9-cef86a02d7ad"],
+ " random number function utility described in the Preliminary section."
+}], "Text",
+ CellChangeTimes->{{3.868435590194943*^9, 3.868435656900713*^9}, {
+  3.8684358405504403`*^9, 3.8684358445076637`*^9}, {3.868435884306514*^9, 
+  3.868435978371967*^9}, {3.868437396211935*^9, 3.868437422450178*^9}, {
+  3.868438226443288*^9, 
+  3.868438231122737*^9}},ExpressionUUID->"a426fbd8-eb44-4fa0-942b-\
+f8dcc13b2e34"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ StyleBox["Definition. ",
+  FontWeight->"Bold"],
+ "A ",
+ StyleBox["reflection functor",
+  FontWeight->"Bold"],
+ " ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalK]", TraditionalForm]],ExpressionUUID->
+  "33b65ff5-9b6d-4b08-91ea-6ae13b328365"],
+ " is defined as an functor object in a functor category ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalR]\[ScriptE]\[ScriptF]", TraditionalForm]],
+  ExpressionUUID->"feb933ad-a8a3-4e10-8f0b-a41db8b480ba"],
+ ", who maps between two micro-statement pools. Because of the Zermelo\
+\[CloseCurlyQuote]s Well-Ordering Theorem we mentioned in the Preliminary \
+section, ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"Ob", "(", "\[ScriptCapitalR]\[ScriptE]\[ScriptF]", ")"}], 
+   TraditionalForm]],ExpressionUUID->"bfe3dddb-418f-481d-a98b-66e10c40781f"],
+ " can be put into well-order, with ordinal ",
+ Cell[BoxData[
+  FormBox["i", TraditionalForm]],ExpressionUUID->
+  "4980ba31-f27a-45ef-8364-fd071ece82f0"],
+ ". All of the reflection functors forms a functor category ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalQ]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "f5d63bcf-787f-43ed-b237-9b5caa3a9e9b"],
+ ", called the ",
+ StyleBox["reflection knowledge base",
+  FontWeight->"Bold"],
+ ", or for short the ",
+ StyleBox["knowledge base",
+  FontWeight->"Bold"],
+ ". The detailed explanation and description, including the utilization of \
+and morphisms inside the knowledge base, will be discussed later in this \
+section of the paper. We annotate each of the functor positioned at location ",
+ Cell[BoxData[
+  FormBox["i", TraditionalForm]],ExpressionUUID->
+  "b40227e7-dd3b-46bd-815b-1cb28892882d"],
+ " with ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "i"], TraditionalForm]],ExpressionUUID->
+  "aafa6fcf-9e0b-41a9-81f5-3ed054a7a538"],
+ "."
+}], "Definition",
+ CellChangeTimes->{{3.8684383371967454`*^9, 3.8684384149629946`*^9}, {
+  3.868513156977219*^9, 3.868513312651219*^9}, {3.8685133461858683`*^9, 
+  3.8685134567602673`*^9}, {3.8685136933283143`*^9, 3.868513702340032*^9}, {
+  3.868518994081379*^9, 3.8685189940853796`*^9}, {3.8686064323894243`*^9, 
+  3.868606525201106*^9}, {3.868606577873493*^9, 
+  3.8686066311640196`*^9}},ExpressionUUID->"a0217062-c976-4d77-b90a-\
+3d3c6729cc4b"],
+
+Cell[TextData[{
+ "Each reflection functor corresponds to a ",
+ StyleBox["template pair",
+  FontWeight->"Bold"],
+ " of micro-statements ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"(", 
+    RowBox[{"\[Sigma]", ",", "\[Tau]"}], ")"}], TraditionalForm]],
+  ExpressionUUID->"e2f80122-9d12-4d1b-9434-8452217abb69"],
+ " which indicates that the effect of the functor is to transform \
+micro-statement ",
+ Cell[BoxData[
+  FormBox["\[Sigma]", TraditionalForm]],ExpressionUUID->
+  "a466e72e-a94d-4ad2-8b84-dcaf0f14cf6d"],
+ " into \[Tau]. The template pair of functor ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalK]", TraditionalForm]],ExpressionUUID->
+  "6d6b38f4-ad4e-43fc-a474-02422faf4e0c"],
+ " is annotated with ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"T", "(", "\[ScriptCapitalK]", ")"}], TraditionalForm]],
+  ExpressionUUID->"78917229-1d97-4de8-9740-8c1326367686"],
+ ". That is,"
+}], "Definition",
+ CellChangeTimes->{{3.8684383371967454`*^9, 3.8684384149629946`*^9}, {
+  3.868513156977219*^9, 3.868513312651219*^9}, {3.8685133461858683`*^9, 
+  3.8685134567602673`*^9}, {3.8685136933283143`*^9, 3.868513702340032*^9}, {
+  3.868518994795663*^9, 
+  3.8685192318913927`*^9}},ExpressionUUID->"64ac8277-d294-4b89-a97f-\
+e7f3697c31a4"]
+}, Open  ]],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Sigma]", "=", 
+   SubscriptBox[
+    RowBox[{"T", "(", "\[ScriptCapitalK]", ")"}], "\[ScriptL]"]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868519275869094*^9, 
+  3.868519284712468*^9}},ExpressionUUID->"ed23d81e-7f01-43af-9c29-\
+0a2908cc8612"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"\[Tau]", "=", 
+   SubscriptBox[
+    RowBox[{"T", "(", "\[ScriptCapitalK]", ")"}], "\[ScriptR]"]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868519275869094*^9, 
+  3.8685192936888175`*^9}},ExpressionUUID->"78388593-f44f-4cc7-8daa-\
+c07361a0ddfb"],
+
+Cell[TextData[{
+ "When reflection functor ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "i"], TraditionalForm]],ExpressionUUID->
+  "c562e9fc-5dd1-4c47-9f49-1fa1141af3b4"],
+ " is applied to a pool ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalM]", "i"], TraditionalForm]],ExpressionUUID->
+  "92c0dcb2-700d-4b33-9998-421af7c679ed"],
+ ", each of the micro-statements in the object set of the pool is proceeded. \
+If a micro-statement is suitable for the reflection, whose detailed \
+explanation will be discussed later, a new micro-statement will be created if \
+there\[CloseCurlyQuote]s no duplication. Then a morphism will be built from \
+the old micro-statement to the new item. The process of identifying whether a \
+micro-statement is capable called an ",
+ StyleBox["isomorphism inspection",
+  FontWeight->"Bold"],
+ " is described as below."
+}], "Text",
+ CellChangeTimes->{{3.8684383371967454`*^9, 3.8684384149629946`*^9}, {
+  3.868513156977219*^9, 3.868513312651219*^9}, {3.8685133461858683`*^9, 
+  3.8685135188706284`*^9}, {3.8685135490711527`*^9, 3.86851358942575*^9}, {
+  3.8685136459526834`*^9, 3.868513668561632*^9}, {3.868513707342596*^9, 
+  3.868513750678985*^9}, {3.868513782144106*^9, 3.8685139010355844`*^9}, {
+  3.868513966674571*^9, 3.8685140555561385`*^9}, {3.8685141166147585`*^9, 
+  3.868514178600484*^9}, {3.8685142352423506`*^9, 3.8685142414564066`*^9}, {
+  3.868524189424403*^9, 
+  3.8685241897473936`*^9}},ExpressionUUID->"f77b498d-bad4-48a4-8709-\
+65195d32e893"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " The process of isomorphism inspection is declared as below. The stuff that \
+the isomorphism inspection process manipulates is a micro-statement ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Mu]", "\[Element]", 
+    SubscriptBox["\[ScriptCapitalM]", "i"]}], TraditionalForm]],
+  ExpressionUUID->"a66c04dc-bd76-4af4-9b89-a3ac6b98e230"],
+ ", a special evaluatable sort of bracket. The definition of bracket being \
+isomorphic can be found in the second section. Explicitly, the inspection \
+process is to construct a new set called the ",
+ StyleBox["transformation source",
+  FontWeight->"Bold"],
+ ", noted as ",
+ Cell[BoxData[
+  FormBox["Ts", TraditionalForm]],ExpressionUUID->
+  "8cd925fd-2e3d-41ea-81b5-68e22c5874bb"],
+ " using the equation below."
+}], "Definition",
+ CellChangeTimes->{{3.868514262380695*^9, 3.8685143197658896`*^9}, {
+  3.868516706905389*^9, 3.8685167266249094`*^9}, {3.868516886833845*^9, 
+  3.868516902919256*^9}, {3.868516951309001*^9, 3.8685169585136476`*^9}, {
+  3.8685170222185917`*^9, 3.868517079992447*^9}, {3.868517270881678*^9, 
+  3.8685172818691177`*^9}, {3.868517313140384*^9, 3.8685173486476088`*^9}, {
+  3.8685174024364758`*^9, 3.8685174154994307`*^9}, {3.868518614647971*^9, 
+  3.8685186747700815`*^9}, {3.868518771281254*^9, 3.8685188092170057`*^9}, {
+  3.868518851430243*^9, 3.8685189063310585`*^9}, {3.8685237729992247`*^9, 
+  3.868523792864134*^9}, {3.868524176527155*^9, 
+  3.8685241768549476`*^9}},ExpressionUUID->"f4c528b5-46e7-4700-ae80-\
+7a5641853143"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"Ts", ":=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"t", "\[Element]", 
+      SubscriptBox["\[ScriptCapitalM]", "i"]}], "|", 
+     RowBox[{"t", "\[TildeEqual]", 
+      SubscriptBox[
+       RowBox[{"T", "(", "\[ScriptCapitalK]", ")"}], "\[ScriptL]"]}]}], 
+    "}"}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8685189088899193`*^9, 3.8685189779698277`*^9}, {
+  3.8685192992678676`*^9, 3.868519327749859*^9}, {3.868523716088456*^9, 
+  3.8685237204569826`*^9}, {3.868523797548843*^9, 3.8685237978581038`*^9}, {
+  3.8685238860643024`*^9, 3.8685238871542234`*^9}, {3.868524172994896*^9, 
+  3.868524173281931*^9}},ExpressionUUID->"48031c10-f279-4762-830c-\
+b6268f10e4b7"],
+
+Cell[TextData[{
+ "What to do next is called a ",
+ StyleBox["transformation",
+  FontWeight->"Bold"],
+ ". Foremost, creates a set of transformation rules that makes one-one maps \
+the micro-statement to manipulate to the left of the template pair ",
+ Cell[BoxData[
+  FormBox["\[Sigma]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "913e34eb-2f0c-4299-b07f-0367927fb9c7"],
+ ". Secondarily, the reverse map is applied to the right of the template pair \
+",
+ Cell[BoxData[
+  FormBox["\[Tau]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "ba293c4f-76d1-4179-bbce-0de431a01f14"],
+ " and then the transformation process execution is done. Then we delineate \
+the definition of  transformation mapping."
+}], "Text",
+ CellChangeTimes->{{3.868519378594031*^9, 3.868519379527614*^9}, {
+  3.868519521009174*^9, 3.868519577835593*^9}, {3.868519616652524*^9, 
+  3.8685196348115225`*^9}, {3.868519674123248*^9, 3.8685196767810726`*^9}, {
+  3.8685197107734594`*^9, 3.86851977550786*^9}, {3.8685198266556616`*^9, 
+  3.8685198368493357`*^9}, {3.868519895297573*^9, 3.8685199746286693`*^9}, {
+  3.868520030115077*^9, 3.868520056073041*^9}, {3.8685201049649878`*^9, 
+  3.8685201448385677`*^9}},ExpressionUUID->"d1cdbdee-d976-4bab-b9f2-\
+682b97ad1711"],
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " A ",
+ StyleBox["transformation map",
+  FontWeight->"Bold"],
+ " is a one-one map defined between the list of symbol and sub-brackets of \
+the two brackets ",
+ Cell[BoxData[
+  FormBox["\[Alpha]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "96fdc2be-c78d-42d2-a1ad-67244fda69d8"],
+ " and ",
+ Cell[BoxData[
+  FormBox["\[Beta]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "9930a437-6cd9-4522-8d15-27bbb1b92e65"],
+ " where,"
+}], "Definition",
+ CellChangeTimes->{{3.8685201514152145`*^9, 3.868520173751589*^9}, {
+  3.8685202400529737`*^9, 3.8685202728646383`*^9}, {3.8685203916964235`*^9, 
+  3.868520423566553*^9}, {3.868520498396141*^9, 
+  3.868520539420355*^9}},ExpressionUUID->"413fc280-4aea-4b66-8244-\
+5f1bae740ae9"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{"\[ScriptCapitalT]", ":", 
+    RowBox[{
+     SubscriptBox["\[Alpha]", "\[ScriptCapitalB]"], "\[Union]", 
+     SubscriptBox["\[Alpha]", "\[ScriptCapitalS]"]}]}], "\[Rule]", 
+   RowBox[{
+    SubscriptBox["\[Beta]", "\[ScriptCapitalB]"], "\[Union]", 
+    SubscriptBox["\[Beta]", "\[ScriptCapitalS]"]}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868520408836873*^9, 3.868520452215827*^9}, {
+  3.8685206924712925`*^9, 3.868520701081852*^9}, {3.868520751435211*^9, 
+  3.8685207536436386`*^9}, {3.8685209308001604`*^9, 
+  3.8685209682734575`*^9}},ExpressionUUID->"64a58555-fbf5-47c0-b6f0-\
+6f68a02979b6"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   SubscriptBox["\[ScriptCapitalS]", "1"], 
+   OverscriptBox["\[Function]", "\[ScriptCapitalT]"], 
+   SubscriptBox["\[ScriptCapitalS]", "2"]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.868520408836873*^9, 3.868520452215827*^9}, {
+  3.8685206924712925`*^9, 3.8685207132704134`*^9}, {3.8685207563366413`*^9, 
+  3.8685207586297584`*^9}},ExpressionUUID->"91a7de82-5e37-4d29-b4af-\
+cacae478a917"],
+
+Cell[TextData[{
+ "To begin with, the translation map between the two temporary sets, that is \
+each of the elements of transformation source and the left element of the \
+template pair, are constructed forming an executable rule that makes each \
+non-notation right pair element ",
+ Cell[BoxData[
+  FormBox["x", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "a7c107a9-fcc9-46ff-9d7e-13893f1d2701"],
+ " in ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[Mu]\[Epsilon]\[ScriptCapitalM]", "i"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "98f01f7e-3f5f-4448-9151-398a4d7aa992"],
+ ", which is a micro-statement to discuss, to have ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"\[ScriptCapitalT]", "(", "x", ")"}], "\[Element]", 
+    RowBox[{
+     SubscriptBox["\[Sigma]", "\[ScriptCapitalB]"], "\[Union]", 
+     SubscriptBox["\[Sigma]", "\[ScriptCapitalS]"]}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e5d60116-eb3e-47c2-b220-ee330c3f4224"],
+ ". After the construction, we execute a ",
+ StyleBox["reverse transformation ",
+  FontWeight->"Bold"],
+ " from ",
+ Cell[BoxData[
+  FormBox["\[Tau]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "9e2fa709-e1e4-4e8e-9170-91d51a61fd95"],
+ " to a new micro-statement ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Mu]", "'"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e762bbaa-bc87-4272-ad97-13b1955fcb5e"],
+ " satisfying that"
+}], "Text",
+ CellChangeTimes->{{3.8685207347942867`*^9, 3.868520791596793*^9}, {
+  3.8685208249971576`*^9, 3.8685208989412303`*^9}, {3.868520972930193*^9, 
+  3.8685210681936817`*^9}, {3.868521177968258*^9, 3.8685211971516113`*^9}, {
+  3.8685228195251427`*^9, 3.8685228702627287`*^9}, {3.86852294391823*^9, 
+  3.868522948833207*^9}, {3.86852297928432*^9, 3.868522995261944*^9}, {
+  3.868523092095812*^9, 3.8685231100382643`*^9}, {3.8685238118951917`*^9, 
+  3.8685238145500975`*^9}, {3.8685239261680517`*^9, 3.868523944347507*^9}, {
+  3.8685240030913076`*^9, 3.868524081045657*^9}, {3.8685241828985977`*^9, 
+  3.868524183205301*^9}},ExpressionUUID->"91a0d7a5-e586-42a8-9734-\
+c71a89a15f64"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    SubscriptBox[
+     RowBox[{"(", 
+      RowBox[{"\[Mu]", "'"}], ")"}], "\[ScriptCapitalB]"], "\[Union]", 
+    SubscriptBox[
+     RowBox[{"(", 
+      RowBox[{"\[Mu]", "'"}], ")"}], "\[ScriptCapitalS]"]}], " ", "=", 
+   RowBox[{
+    SuperscriptBox["\[ScriptCapitalT]", 
+     RowBox[{"-", "1"}]], "(", 
+    RowBox[{
+     SubscriptBox["\[Mu]", "\[ScriptCapitalB]"], "\[Union]", 
+     SubscriptBox["\[Mu]", "\[ScriptCapitalS]"]}], ")"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8685231188621283`*^9, 3.868523195436591*^9}, {
+  3.8685237268178606`*^9, 3.868523751776677*^9}, {3.8685238036450796`*^9, 
+  3.8685238254263973`*^9}},ExpressionUUID->"f37d4dd6-4112-43ef-855d-\
+96137f72599c"],
+
+Cell[TextData[{
+ "And then micro-statement ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[Mu]", "'"}], TraditionalForm]],ExpressionUUID->
+  "a81b0a05-8f2a-4b12-9d2d-52d74fd46688"],
+ " is the freshly baked derivation achievement. All of the micro-statements \
+as results of map ",
+ Cell[BoxData[
+  FormBox[
+   SuperscriptBox["\[ScriptCapitalT]", 
+    RowBox[{"-", "1"}]], TraditionalForm]],ExpressionUUID->
+  "50a175d7-89f0-4930-b6be-68163b167015"],
+ " forms new set ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"\[ScriptCapitalM]", "'"}], TraditionalForm]],ExpressionUUID->
+  "bc44cf99-a9e6-4f6b-aeea-f8a01566b8d5"],
+ ". In the end we process the pool ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalM]", TraditionalForm]],ExpressionUUID->
+  "65ec80f4-f6b8-4de2-90bf-1d3d9274da9f"],
+ " with this union operation:"
+}], "Text",
+ CellChangeTimes->{{3.8685232130541706`*^9, 3.8685232260501595`*^9}, {
+  3.868523376642133*^9, 3.8685234073409634`*^9}, {3.868523451507908*^9, 
+  3.868523470473031*^9}, {3.8685235163063335`*^9, 3.8685235179680543`*^9}, {
+  3.868523557308132*^9, 3.868523562002491*^9}, {3.8685235947259893`*^9, 
+  3.868523661261117*^9}, {3.8685237433656454`*^9, 3.8685237440263696`*^9}, {
+  3.8685239510672936`*^9, 3.868523981262327*^9}, {3.8685240865885897`*^9, 
+  3.8685241242200174`*^9}},ExpressionUUID->"b1e635aa-2b10-459c-8095-\
+11aa3c7336bf"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   SubscriptBox["\[ScriptCapitalM]", 
+    RowBox[{"i", "+", "1"}]], "=", 
+   RowBox[{
+    SubscriptBox["\[ScriptCapitalM]", "i"], "\[Union]", 
+    RowBox[{"\[ScriptCapitalM]", "'"}]}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8685241273864975`*^9, 
+  3.868524169577773*^9}},ExpressionUUID->"205cc42c-e367-4a1a-9e45-\
+1ebf0477275a"],
+
+Cell[TextData[{
+ "The process above explains how the reflection functor ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalK]", TraditionalForm]],ExpressionUUID->
+  "90723436-0c07-418f-8c8f-4b82c9e2ec56"],
+ " evolves ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalM]", "i"], TraditionalForm]],ExpressionUUID->
+  "dc81e1f2-f852-4040-baf8-c0f01d503ead"],
+ " into ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalM]", 
+    RowBox[{"i", "+", "1"}]], TraditionalForm]],ExpressionUUID->
+  "230254dc-9d60-40e4-8e7f-ee3d724aa307"],
+ ". Nevertheless, actually the derivation is be done into practice using \
+recursive functor ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalF]", "i"], TraditionalForm]],ExpressionUUID->
+  "176b0e7b-8aa5-4ebe-bb3e-baf1c8cfcd44"],
+ ", which select ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalK]", TraditionalForm]],ExpressionUUID->
+  "f545b4b6-5b44-4134-a692-9bfe63f0db81"],
+ " as the reflection functor to utilize, following the specification we had \
+like to present below."
+}], "Text",
+ CellChangeTimes->{{3.8685241966273804`*^9, 3.8685243330970592`*^9}, {
+  3.868524369250766*^9, 3.8685243798361607`*^9}, {3.8685244158254356`*^9, 
+  3.8685244518565645`*^9}},ExpressionUUID->"7016e2cc-8ab4-4994-bb9c-\
+eeee12165351"],
+
+Cell[TextData[{
+ "The recursive functor ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalF]", "i"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e2843d52-e805-43b2-ae75-c227a9ff67a9"],
+ " decides the reflection functor to use based on these things: the random \
+seed (in this paper is passed implicitly and the random generator function is \
+annotated with ",
+ Cell[BoxData[
+  FormBox["\[ScriptR]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "72049363-adfd-492c-a812-e0ed0c95c1a5"],
+ ". However, the functor is for sure pure because actually the seed is passed \
+as a parameter), knowledge base that is the functor category that all \
+reflection functors form, as well as an integer ",
+ Cell[BoxData[
+  FormBox["j", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5fdeca1a-b2e6-4b18-9a37-00ab664d8fa6"],
+ ", indicating last time ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "j"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "9ae5e445-b34f-4127-b46b-4f8695be0899"],
+ " is executed. To begin with, we will investigate into the organization of \
+objects in the knowledge base ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalQ]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b4564794-ffd4-4093-80c2-5736f9c93238"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.8685778625547237`*^9, 3.868577919394532*^9}, {
+   3.868602692690106*^9, 3.868602777122669*^9}, {3.8686061613435946`*^9, 
+   3.868606231149792*^9}, {3.868606312515664*^9, 3.868606355965149*^9}, {
+   3.868606547343715*^9, 3.8686065677534423`*^9}, {3.8686067559843082`*^9, 
+   3.868606784896325*^9}, 
+   3.868606934861702*^9},ExpressionUUID->"36a6a9ce-af5a-4363-8a94-\
+bfa06db10681"],
+
+Cell[TextData[{
+ StyleBox["Definition. ",
+  FontWeight->"Bold"],
+ "The ",
+ StyleBox["initial map ",
+  FontWeight->"Bold"],
+ "is the original state of knowledge base ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalQ]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "ca18e621-3df2-4030-a8c3-01dd5bb357eb"],
+ " when ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalQ]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "018ff10c-18a2-4fba-992c-c8e52fc689dc"],
+ " is created. Initially, after the reflection functors are sorted, while \
+discussions around this take place before, they forms a circular with \
+connection of morphisms. That is, for ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"N", "=", 
+    RowBox[{"|", 
+     RowBox[{"Ob", "(", "\[ScriptCapitalQ]", ")"}], "|"}]}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5f166bf6-cdc8-444f-9d89-8c12d246de46"],
+ ","
+}], "Definition",
+ CellChangeTimes->{{3.868607110256447*^9, 3.8686072680739603`*^9}, {
+  3.868607298185274*^9, 
+  3.868607321078652*^9}},ExpressionUUID->"743ed089-a215-4a97-b1bb-\
+b0c0973dba34"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    SubscriptBox["\[ScriptCapitalK]", "n"], 
+    OverscriptBox["\[Rule]", 
+     SubscriptBox["k", "n"]], 
+    SubscriptBox["\[ScriptCapitalK]", 
+     RowBox[{"n", "+", "1"}]]}], ",", " ", 
+   RowBox[{"n", "\[Element]", 
+    SubscriptBox["\[DoubleStruckCapitalZ]", 
+     RowBox[{"[", 
+      RowBox[{"0", ",", 
+       RowBox[{"N", "-", "1"}]}], "]"}]]}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8686072707750897`*^9, 3.868607295057993*^9}, {
+  3.868607326362253*^9, 3.868607352872562*^9}, {3.868608898442148*^9, 
+  3.8686089177842827`*^9}, {3.8686089733941326`*^9, 
+  3.8686089769272947`*^9}},ExpressionUUID->"95bc3456-46a2-4958-900d-\
+463c91c4ba7c"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   SubscriptBox["\[ScriptCapitalK]", "N"], 
+   OverscriptBox["\[Rule]", 
+    SubscriptBox["k", "N"]], 
+   SubscriptBox["\[ScriptCapitalK]", "0"]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8686072707750897`*^9, 3.868607295057993*^9}, {
+  3.868607326362253*^9, 3.868607362532403*^9}, {3.8686089231978936`*^9, 
+  3.8686089254906645`*^9}},ExpressionUUID->"075f8c6d-32d1-4e51-83ea-\
+ed9baa630f07"],
+
+Cell[CellGroupData[{
+
+Cell["Graphically, we have:", "DefinitionContinuation",
+ CellChangeTimes->{{3.868607364918696*^9, 3.868607386109518*^9}, {
+  3.868607557107489*^9, 
+  3.868607557107489*^9}},ExpressionUUID->"bdd0370c-341d-4391-affa-\
+c7b145b01c0d"],
+
+Cell["\<\
+Note. There should be latex TIKZ graph here... There\[CloseCurlyQuote]s no \
+graph now because there is a bug with the graphing software package. I opened \
+an issue about the bug and reminded the software developer some time (exactly \
+half an hour) earlier and he has not replied me yet...\
+\>", "DefinitionContinuation",
+ CellChangeTimes->{{3.868607364918696*^9, 3.868607386109518*^9}, {
+  3.8686075577200494`*^9, 3.868607578842491*^9}, {3.8686076453596478`*^9, 
+  3.8686076543994985`*^9}, {3.8686077338751297`*^9, 3.8686077967450657`*^9}, {
+  3.8686078988041725`*^9, 3.868607899667051*^9}, {3.8686083966412954`*^9, 
+  3.868608417201525*^9}},ExpressionUUID->"c0003362-973c-432c-85eb-\
+b792a005d5c4"],
+
+Cell[TextData[{
+ "A morphism in this category means that if the reflection functor on its \
+start is executed just now, then the target functor will be executed next \
+time. That is, to be more specific, if a functor in ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalQ]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "4098aaca-996b-43dd-a6df-1c95ec4cab37"],
+ " has no morphisms targeting it, then it will be never executed unless it is \
+configured as the beginning functor (location ",
+ Cell[BoxData[
+  FormBox["0", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "d5c57559-0653-4ac2-8d6a-47a594efe353"],
+ ") manually. Moreover, if a functor has more than one morphisms starting \
+from it, then we call this functor ",
+ StyleBox["extroverted",
+  FontWeight->"Bold"],
+ ". Otherwise, if a functor has more than one morphisms targeting it, it is ",
+ StyleBox["introverted",
+  FontWeight->"Bold"],
+ ". If one has only two morphisms connected, one in and one out, thus it is",
+ StyleBox[" ordinary",
+  FontWeight->"Bold"],
+ ". The process of determining the next functor of a extroverted functor will \
+be discussed below."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.868607364918696*^9, 3.868607386109518*^9}, {
+  3.8686075577200494`*^9, 3.868607578842491*^9}, {3.8686076453596478`*^9, 
+  3.8686076543994985`*^9}, {3.8686077338751297`*^9, 3.8686077967450657`*^9}, {
+  3.8686078988041725`*^9, 3.868607899667051*^9}, {3.8686083966412954`*^9, 
+  3.8686085894244466`*^9}, {3.8686086885307417`*^9, 
+  3.8686087915725393`*^9}},ExpressionUUID->"d47fe5ad-ed04-4a72-8515-\
+7c309fb469ff"]
+}, Open  ]],
+
+Cell["\<\
+The definition below describes how the recursive functor uses the knowledge \
+base and the further evolution for the data structure of the knowledge base. \
+It ought to be paid attention to that although in the Introduction part that \
+I say this new method of implementing a prover makes the prover low-knowledge \
+and it turns out to have an infrastructure called the knowledge base. This is \
+not conflictual since the knowledge I mean by in the Introduction section \
+means the algorithm is automated, which means it does not require users to \
+give in too much assistance and it does not know exactly what is under \
+manipulation. On the other hand, however, the knowledge word here means by \
+the storage of reflections, which can be rules, axioms, theorems, lemmas and \
+even strategies.\
+\>", "Text",
+ CellChangeTimes->{{3.8686079082358103`*^9, 3.8686080915661197`*^9}, {
+  3.8686081661955986`*^9, 
+  3.868608354635398*^9}},ExpressionUUID->"440f444b-d5f1-4b28-8d45-\
+acda61bbf7c9"],
+
+Cell[TextData[{
+ StyleBox["Definition. ",
+  FontWeight->"Bold"],
+ "A recursive functor ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalF]", "i"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "6fc32cbd-58e0-439a-ba84-d7eb98a9592f"],
+ " is a functor that applies to pool ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalM]", "i"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "067fbd97-f3cb-42dd-a2db-6fe44da4d4fd"],
+ " and evolves it into ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalM]", 
+    RowBox[{"i", "+", "1"}]], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "a031290e-7b32-4cf0-aaec-b152b0ab8290"],
+ ". The process of determining which ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "w"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e283f44f-f4a8-4f01-b66c-27a7a61d2e7c"],
+ " is ",
+ StyleBox["selected",
+  FontWeight->"Bold"],
+ " after former reflection functor ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "j"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "0f085255-eb92-4bc1-a6fe-1e072f0d9198"],
+ " generally works on the knowledge base ",
+ Cell[BoxData[
+  FormBox["\[ScriptCapitalQ]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "5c1fedef-bb9d-4f24-8fb1-183db5b1634e"],
+ ", right starting from the initial map. If this is the first time for the \
+recursive functor to execute, then ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "0"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "7d81a047-f197-470c-89ef-6109f5eb1a69"],
+ " is selected. If ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalF]", "i"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "20f5b126-7a52-4716-b3a0-ab985d92046a"],
+ " encounters with an introverted or ordinary functor ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "j"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "ffb3f373-83d5-4a3c-b729-f98b2d60e5d4"],
+ " then significantly,"
+}], "Definition",
+ CellChangeTimes->{{3.8686063699108367`*^9, 3.86860642187202*^9}, {
+  3.868606638039282*^9, 3.8686067426181602`*^9}, {3.868608000447051*^9, 
+  3.868608013748171*^9}, {3.868608805500808*^9, 3.868608893811454*^9}, {
+  3.8686089350719013`*^9, 
+  3.8686089588663034`*^9}},ExpressionUUID->"2a4ce40f-034f-4793-99b9-\
+0dc8941c53af"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"w", " ", "=", " ", 
+   RowBox[{
+    SubscriptBox["k", "j"], "(", 
+    SubscriptBox["\[ScriptCapitalK]", "j"], ")"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8686089613006973`*^9, 
+  3.8686089895394173`*^9}},ExpressionUUID->"1e9dabd0-4f0d-4e6b-8489-\
+60ed42454fe7"],
+
+Cell[TextData[{
+ "If ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalF]", "i"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "e52b1a64-3c11-44f8-8a8c-4d31f3fcafd7"],
+ " encounters with an extroverted functor, then the random number ",
+ Cell[BoxData[
+  FormBox["\[ScriptR]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "801c7aa2-58aa-483e-bb3d-7105f89c784c"],
+ " is utilized and ",
+ Cell[BoxData[
+  FormBox["w", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "95121393-fe87-4299-a572-6afaa2210eae"],
+ " turns out to be the following:"
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.8686089964000473`*^9, 3.8686090415798693`*^9}, {
+  3.868609123747525*^9, 3.868609140165272*^9}, {3.868609179301588*^9, 
+  3.868609200398038*^9}},ExpressionUUID->"a322cfc8-2eec-4eb4-b646-\
+5db8201945b3"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"w", " ", "=", " ", 
+   RowBox[{
+    RowBox[{"\[ScriptR]", " ", "mod", " ", 
+     UnderoverscriptBox["\[Sum]", 
+      RowBox[{"u", "=", "0"}], "N"]}], "|", 
+    RowBox[{
+     SubscriptBox["Hom", "\[ScriptCapitalQ]"], "(", 
+     RowBox[{
+      SubscriptBox["\[ScriptCapitalK]", "j"], ",", 
+      SubscriptBox["\[ScriptCapitalK]", "q"]}], ")"}], "|"}]}], 
+  TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8686092079469595`*^9, 
+  3.868609267832732*^9}},ExpressionUUID->"3ee4ee48-af5a-485b-82b1-\
+1abbe969f49c"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "It is easy to understand that for each reflection functor ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "a"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "61bacaaa-64b0-4598-8cc1-204f419946b9"],
+ " and ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "b"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "86d75781-d859-4544-a477-ef4cbfd9bc07"],
+ ", the count of set ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    SubscriptBox["Hom", "\[ScriptCapitalQ]"], "(", 
+    RowBox[{
+     SubscriptBox["\[ScriptCapitalK]", "a"], ",", 
+     SubscriptBox["\[ScriptCapitalK]", "b"]}], ")"}], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "cb81f1ce-c835-47c5-896b-cb00dde724b6"],
+ " indicates the ",
+ StyleBox["weight",
+  FontWeight->"Bold"],
+ " of ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "b"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "d7443513-6c84-48cc-b0a0-a4518fb6046c"],
+ " to ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "a"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "4b4e600b-4dcd-445f-b0e9-ace0bc18ccf5"],
+ ", controlling the probability of ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "b"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "05c98881-921a-47a8-9a97-49d1ff62ebd9"],
+ " to be selected when the former functor is ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[ScriptCapitalK]", "a"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "b6f584b8-7b46-41df-b82b-fc18b386c730"],
+ ". The design of this process is inspired by the lottery scheduling \
+algorithm I learnt in Andrew S. Tanenbaum\[CloseCurlyQuote]s Operating \
+Systems: Design and Implementation."
+}], "DefinitionContinuation",
+ CellChangeTimes->{{3.8686095923395863`*^9, 3.868609713958993*^9}, {
+  3.8686102991069956`*^9, 3.868610349164325*^9}, {3.8686105550665984`*^9, 
+  3.868610590632148*^9}},ExpressionUUID->"6e575405-3e7d-486b-be80-\
+baefb10a1dd4"],
+
+Cell["\<\
+Note. There should be a BIBTEX entry for this. I will add that later after I \
+finish the writing on Mathematica, which does NOT support adding citations. \
+The citation format can be exported here: \
+https://dl.acm.org/doi/book/10.5555/21853 on the ACM website.\
+\>", "DefinitionContinuation",
+ CellChangeTimes->{{3.8686095923395863`*^9, 3.868609713958993*^9}, {
+  3.8686102991069956`*^9, 3.868610349164325*^9}, {3.8686105550665984`*^9, 
+  3.8686106494585667`*^9}, {3.868610851006547*^9, 
+  3.8686108544551077`*^9}},ExpressionUUID->"b8cc7ea3-5fb4-423b-ae2f-\
+f9e3b8416827"]
+}, Open  ]],
+
+Cell["\<\
+An issue that worth attention is that as the random generator is defined as \
+the following recursion formula:\
+\>", "Text",
+ CellChangeTimes->{{3.8686092922769084`*^9, 
+  3.868609348357297*^9}},ExpressionUUID->"d586399e-2586-47d2-9ba5-\
+1939aec4a3d0"],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   SubscriptBox["X", 
+    RowBox[{"n", "+", "1"}]], "=", 
+   RowBox[{
+    RowBox[{"(", 
+     RowBox[{
+      RowBox[{"1103515245", " ", 
+       SubscriptBox["X", "n"]}], "+", "12345"}], ")"}], " ", "mod", " ", 
+    SuperscriptBox["2", "32"]}]}], TraditionalForm]], "Equation",
+ CellChangeTimes->{{3.8684369618846517`*^9, 3.868436980722434*^9}, {
+  3.868609371015834*^9, 
+  3.8686093786269836`*^9}},ExpressionUUID->"8310fe63-c511-407d-8b46-\
+b19dbc53414c"],
+
+Cell[TextData[{
+ "Then each ",
+ Cell[BoxData[
+  FormBox["\[ScriptR]", TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "06dff41f-fc8e-4276-9aa2-fde011bbb291"],
+ " must belongs to region ",
+ Cell[BoxData[
+  FormBox[
+   SubscriptBox["\[DoubleStruckCapitalZ]", 
+    RowBox[{
+     RowBox[{"[", 
+      RowBox[{"0", ",", 
+       SuperscriptBox["2", "32"]}]}], ")"}]], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "6a0bbbc0-edde-44fb-bcf9-3c495c2bfc78"],
+ ". That is, obviously, if ",
+ Cell[BoxData[
+  RowBox[{
+   UnderoverscriptBox["\[Sum]", 
+    RowBox[{"u", "=", "0"}], "N"], 
+   RowBox[{"|", 
+    RowBox[{
+     SubscriptBox["Hom", "\[ScriptCapitalQ]"], 
+     RowBox[{"(", 
+      RowBox[{
+       SubscriptBox["\[ScriptCapitalK]", "j"], ",", 
+       SubscriptBox["\[ScriptCapitalK]", "q"]}], ")"}]}], "|", 
+    RowBox[{"\[GreaterEqual]", 
+     SuperscriptBox["2", "32"]}]}]}]], "Equation",
+  CellChangeTimes->{{3.8686092079469595`*^9, 3.868609267832732*^9}},
+  ExpressionUUID->"26fc59b9-e8b4-4ac2-8a27-383af7fb8274"],
+ ", then there will be some of the functors that will never be referred to, \
+although there do exist morphisms targeting them. While in this paper the \
+problem will not be solved and we assume that the number of the morphisms \
+added up is smaller than the boundary of ",
+ Cell[BoxData[
+  FormBox[
+   SuperscriptBox["2", "32"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "bc16541e-d2aa-42b8-92dc-69440d6869ae"],
+ ", which equals to four giga bytes and will not be exceeded in most \
+engineering situations. Obviously although using the portable recursion \
+equation the quality of the random numbers generated may be lower than \
+nowadays\[CloseCurlyQuote] some technical implementations, it can be \
+conveniently expressed in this paper. If the algorithm is implemented into \
+the read world, a randomness collector, which generates random numbers from \
+the real world, for example, the viberation of the computer motherboard, will \
+probably act as a better solution."
+}], "Text",
+ CellChangeTimes->{{3.8686093841847177`*^9, 3.868609476637949*^9}, {
+  3.8686095226624465`*^9, 3.868609574581159*^9}, {3.868610770313912*^9, 
+  3.8686108460227847`*^9}, {3.868611174941888*^9, 3.868611211343753*^9}, {
+  3.8686114514194613`*^9, 
+  3.86861160577032*^9}},ExpressionUUID->"d1b644ed-bcf0-4fea-9013-\
+fe9930563d9d"],
+
+Cell[TextData[{
+ "It should be noted that if the initial map does not evolve, the proof \
+efficiency will be primitive. Hence, we define a supplement process called ",
+ StyleBox["knowledge reinforcement",
+  FontWeight->"Bold"],
+ ", with definition coming below."
+}], "Text",
+ CellChangeTimes->{{3.8686117234168124`*^9, 3.8686117540445957`*^9}, {
+  3.868611817482938*^9, 
+  3.868611886100293*^9}},ExpressionUUID->"d8a96d52-86ac-41fb-9460-\
+c5345c4fa0c9"],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ StyleBox["Definition.",
+  FontWeight->"Bold"],
+ " The process of knowledge reinforcement is done after a finishing a proof. \
+The first step of this reinforcement is to add numbers of utilization of the \
+corresponding morphism of copies of morphisms into the knowledge base, \
+increasing the weight of connections between the reflection functors. When \
+next time a proof is issued, the modified knowledge base is ",
+ StyleBox["loaded",
+  FontWeight->"Bold"],
+ " into instance and act as the modified initial situation."
+}], "Definition",
+ CellChangeTimes->{{3.868611868439721*^9, 3.8686120849730873`*^9}, {
+  3.8686121780291033`*^9, 
+  3.868612209067911*^9}},ExpressionUUID->"4ae296d0-e549-4ccf-9093-\
+6e5657ebc635"],
+
+Cell[TextData[{
+ "The second step of this sort of reinforcement is called ",
+ StyleBox["reduction",
+  FontWeight->"Bold"],
+ ", which is based on the Ebbinghaus\[CloseCurlyQuote]s forgetful curve\
+\[CloseCurlyQuote]s numerical fit function. The exact form of the function \
+expression can be found in the Preliminary section. Specifically, the number \
+of morphisms is decreased following the forgetful equation, changing into the \
+nearest integer number. To be more explicit, the Ebbinghaus-reduced decimal \
+is stored separately from the knowledge base and the exact and accurate \
+representation for this is ommitted in the paper."
+}], "Definition",
+ CellChangeTimes->{{3.868611868439721*^9, 3.868612154610472*^9}, {
+  3.868612219112187*^9, 3.8686123157948537`*^9}, {3.8686123461159754`*^9, 
+  3.8686124227558928`*^9}},ExpressionUUID->"6d98d2a1-ecdf-4df0-8356-\
+d24a53eab60a"]
+}, Open  ]],
+
+Cell["\<\
+Via the process we described in the forth section and the data structures we \
+presented in the third section, a mathematical proof can be conducted over \
+category theory\[CloseCurlyQuote]s accurate representation. Then, a proof \
+procedure is generated using the form of reflection history, that is, the \
+historical list of the reflection functors utilized by the proof.\
+\>", "Text",
+ CellChangeTimes->{{3.868612429925088*^9, 
+  3.8686125344018655`*^9}},ExpressionUUID->"423145b4-3ee3-461a-8f57-\
+0a11fdf1417f"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Conclusions and Future Work", "Section",
+ CellChangeTimes->{{3.8686126468557534`*^9, 3.868612648321764*^9}, {
+  3.868612959952036*^9, 
+  3.868612964025727*^9}},ExpressionUUID->"8f1d4616-5d96-4fbc-bcef-\
+8397c4660420"],
+
+Cell["\<\
+In the sections before I have presented an elegant data structure for \
+representing mathematical concepts and a neat process which utilizes category \
+theory concepts and knowledge to conduct proof, which also have \
+self-optimization features.\
+\>", "Text",
+ CellChangeTimes->{{3.8686126497689543`*^9, 3.868612671580704*^9}, {
+  3.8686127044613595`*^9, 3.8686127052492247`*^9}, {3.868612757254908*^9, 
+  3.8686127943607206`*^9}, {3.8686128326340213`*^9, 
+  3.8686129312970457`*^9}},ExpressionUUID->"781645a1-6fdb-441b-9609-\
+2f75c32ee5ca"],
+
+Cell["\<\
+Currently I have developed a computer program called DefQed that implements \
+the algorithm and it is open-sourced with BSD 3-Clause \
+\[OpenCurlyDoubleQuote]New\[CloseCurlyDoubleQuote] or \
+\[OpenCurlyDoubleQuote]Revised\[CloseCurlyDoubleQuote] License on GitHub. The \
+source code of the latest version can be accessed at \
+https://github.com/ZijianFelixWang/DefQed. It should be noted that the \
+version is very early and some aspects of the algorithm I presented in the \
+paper is not implemented.\
+\>", "Text",
+ CellChangeTimes->{{3.8686126497689543`*^9, 3.868612671580704*^9}, {
+  3.8686127044613595`*^9, 3.8686127052492247`*^9}, {3.868612757254908*^9, 
+  3.8686127943607206`*^9}, {3.8686128326340213`*^9, 3.8686129363978395`*^9}, {
+  3.8686129733940306`*^9, 
+  3.868613139569704*^9}},ExpressionUUID->"ee854df2-e7aa-41b3-9730-\
+b739c1ddfa1f"],
+
+Cell[TextData[{
+ "Future works include implementing the software, improving the algorithm for \
+making it possible to prove with knowledge base that has more then ",
+ Cell[BoxData[
+  FormBox[
+   SuperscriptBox["2", "32"], TraditionalForm]],
+  FormatType->"TraditionalForm",ExpressionUUID->
+  "3844209d-6ce7-4026-a285-4b07449a87c9"],
+ " morphisms and finding ways to increase the performance of the algorithm."
+}], "Text",
+ CellChangeTimes->{{3.8686126497689543`*^9, 3.868612671580704*^9}, {
+  3.8686127044613595`*^9, 3.8686127052492247`*^9}, {3.868612757254908*^9, 
+  3.8686127943607206`*^9}, {3.8686128326340213`*^9, 3.8686129363978395`*^9}, {
+  3.8686129733940306`*^9, 
+  3.8686132142514906`*^9}},ExpressionUUID->"efb8d4d9-e797-4cd6-ad97-\
+27c89ddf5dbf"],
+
+Cell[TextData[{
+ StyleBox["Acknowledgements. ",
+  FontWeight->"Bold"],
+ "I express my sincerest greatest gratitude to my tutor Prof. Shao Xinhui, \
+the Yingcai Jihua Project of P.R.China, which enables middle school students \
+to conduct science research, my senior high school Northern Eastern Yucai \
+School of P.R.China and the corresponding university Northern Eastern \
+University of P.R.China. I also thank my parents for encouraging me to \
+conduct this research project."
+}], "Acknowledgments",
+ CellChangeTimes->{{3.868613223962302*^9, 
+  3.8686133951928563`*^9}},ExpressionUUID->"94344ab6-4bfd-498a-9aa4-\
+6cdeab0c1625"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{1536, 773},
+WindowMargins->{{-8, Automatic}, {Automatic, -8}},
+PrintingCopies->1,
+PrintingPageRange->{32000, 32000},
+PrintingOptions->{"Magnification"->1.,
+"PaperOrientation"->"Portrait",
+"PaperSize"->{612, 792}},
+Magnification:>1.7 Inherited,
+FrontEndVersion->"12.0 for Microsoft Windows (64-bit) (April 8, 2019)",
+StyleDefinitions->Notebook[{
+   Cell[
+    StyleData[
+    StyleDefinitions -> 
+     FrontEnd`FileName[{"Article"}, "JournalArticle.nb", CharacterEncoding -> 
+       "UTF-8"]]]}, Visible -> False, FrontEndVersion -> 
+  "12.0 for Microsoft Windows (64-bit) (April 8, 2019)", StyleDefinitions -> 
+  "PrivateStylesheetFormatting.nb"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[580, 22, 227, 3, 130, "Title",ExpressionUUID->"3475194a-e162-43da-bcdb-b26a5f0bf0c2"],
+Cell[CellGroupData[{
+Cell[832, 29, 159, 3, 73, "Author",ExpressionUUID->"15b3d076-9d7d-4604-89cd-6d8dbd6132d6"],
+Cell[994, 34, 215, 4, 22, "Institution",ExpressionUUID->"8b7ace94-da76-4540-8a18-657e926298aa"],
+Cell[1212, 40, 742, 12, 223, "Abstract",ExpressionUUID->"62fc1357-db88-4f4f-bc38-e828e06c656f"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1991, 57, 258, 4, 84, "Section",ExpressionUUID->"80e37457-e666-4044-b96f-3cfb183bfa89"],
+Cell[2252, 63, 1088, 17, 118, "Text",ExpressionUUID->"5765d764-c4d7-4417-a2ee-35faf120ed55"],
+Cell[3343, 82, 1356, 20, 118, "Text",ExpressionUUID->"e9752782-2e2e-4475-b42a-43a54ef353e4"],
+Cell[4702, 104, 795, 12, 91, "Text",ExpressionUUID->"4dac62e7-6e5d-4cb2-a8e3-be1c77ff6c41"],
+Cell[5500, 118, 1153, 18, 118, "Text",ExpressionUUID->"42a7f07b-f233-4331-aabb-2777e2f66686"],
+Cell[6656, 138, 770, 13, 64, "Text",ExpressionUUID->"83cd6986-0e81-44b5-adb0-add6526bf782"],
+Cell[7429, 153, 293, 8, 36, "Text",ExpressionUUID->"c540985b-8bad-40af-b3d0-ab69476ab407"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7759, 166, 337, 5, 84, "Section",ExpressionUUID->"3a724e6a-7d9c-42bd-8142-aad3f1aa2e6f"],
+Cell[CellGroupData[{
+Cell[8121, 175, 224, 4, 57, "Subsection",ExpressionUUID->"0e83cb01-12f8-4abd-a8b5-7c62f11ae7cf"],
+Cell[8348, 181, 1148, 26, 64, "Text",ExpressionUUID->"64e47d8e-93de-470e-a2aa-e3fa3da3d9a0"],
+Cell[9499, 209, 247, 7, 46, "Equation",ExpressionUUID->"50f5c058-4ca8-4034-b2d5-32963f6f75bf"],
+Cell[9749, 218, 392, 7, 46, "Equation",ExpressionUUID->"1fad41d3-3561-40ea-87cc-ca1b1f1c255b"],
+Cell[10144, 227, 1163, 37, 36, "Text",ExpressionUUID->"65deb081-6161-41e5-9f81-d57abd03cb86"],
+Cell[11310, 266, 2802, 80, 64, "Text",ExpressionUUID->"33424d97-a138-4d6a-a872-c3b58ed8bd2a"],
+Cell[14115, 348, 1853, 50, 38, "Text",ExpressionUUID->"28530e85-603e-453e-8204-8a88e5f121ca"],
+Cell[15971, 400, 912, 30, 36, "Text",ExpressionUUID->"fd75e875-edb3-4e40-8e7c-27c287f80900"],
+Cell[16886, 432, 324, 8, 37, "Text",ExpressionUUID->"8607d048-d60e-4d79-8e75-98cedabe1b9a"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17247, 445, 163, 3, 57, "Subsection",ExpressionUUID->"3ed168ab-c34e-4268-8dfe-2c1416c3e763"],
+Cell[17413, 450, 334, 7, 36, "Text",ExpressionUUID->"6b2215e4-c523-4fec-b07b-07b2df821661"],
+Cell[CellGroupData[{
+Cell[17772, 461, 277, 8, 37, "Axiom",ExpressionUUID->"ab7507d0-f3e5-485d-8702-bfc3acd9ba79"],
+Cell[18052, 471, 1302, 39, 36, "AxiomContinuation",ExpressionUUID->"bd710cdd-a258-4123-a99e-66445cde32d9"]
+}, Open  ]],
+Cell[19369, 513, 270, 6, 36, "Text",ExpressionUUID->"8ea254d9-8ae9-4cff-bff3-e61dd61c1212"],
+Cell[CellGroupData[{
+Cell[19664, 523, 356, 8, 37, "Theorem",ExpressionUUID->"8ceb3472-c91b-4010-8f4f-7580eeac50f7"],
+Cell[20023, 533, 435, 11, 36, "TheoremContinuation",ExpressionUUID->"f420b955-8829-420a-ab6a-39ef233ebc38"],
+Cell[20461, 546, 1719, 48, 65, "Proof",ExpressionUUID->"f04ebc58-8ca7-468c-8c9c-939ec22040a1"]
+}, Open  ]],
+Cell[22195, 597, 978, 29, 80, "Equation",ExpressionUUID->"b5aaef94-3f60-4c6e-bbf8-618888e86587"],
+Cell[CellGroupData[{
+Cell[23198, 630, 1710, 48, 67, "ProofContinuation",ExpressionUUID->"8b364391-45e7-4367-8687-6f2b08f7fcf8"],
+Cell[24911, 680, 178, 2, 41, "QED",ExpressionUUID->"b64a87f7-081c-4c41-ba4f-7a7291beca74"]
+}, Open  ]],
+Cell[25104, 685, 457, 8, 36, "Text",ExpressionUUID->"c7d902cf-37d1-4a43-8707-c4777e52b7b0"],
+Cell[25564, 695, 422, 13, 73, "Equation",ExpressionUUID->"af088125-77ca-43a3-8d72-af5fedbd8555"],
+Cell[25989, 710, 821, 22, 36, "Text",ExpressionUUID->"1f011bc5-6203-4f05-81b3-9a90ea13175a"],
+Cell[26813, 734, 519, 10, 36, "Text",ExpressionUUID->"419fee54-40ab-47c2-a4bb-7a7666eb49d0"],
+Cell[27335, 746, 401, 13, 46, "Equation",ExpressionUUID->"56375ee1-a4e1-488e-899e-d90f1566d050"],
+Cell[27739, 761, 328, 7, 36, "Text",ExpressionUUID->"45b5aa7c-62c9-46b5-8f1f-849be9e77e40"],
+Cell[28070, 770, 439, 10, 49, "Equation",ExpressionUUID->"998ed0c7-7a63-42ef-8589-1617ae3cdeb1"],
+Cell[28512, 782, 588, 13, 64, "Text",ExpressionUUID->"24770d97-cde4-4518-8067-97d61fa8d9bf"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[29149, 801, 256, 4, 84, "Section",ExpressionUUID->"1bc0e8a2-48ba-4018-a936-dcb0884d19ea"],
+Cell[29408, 807, 1995, 52, 93, "Text",ExpressionUUID->"da036e55-abbf-45e6-92cf-5c0126cdeb42"],
+Cell[31406, 861, 432, 10, 46, "Equation",ExpressionUUID->"6eab7b9d-7ad1-4e5c-b192-9e5e3efa857d"],
+Cell[31841, 873, 192, 3, 36, "Text",ExpressionUUID->"b75b14a2-0563-489d-967c-a6f43dd1ac2c"],
+Cell[32036, 878, 479, 8, 64, "Text",ExpressionUUID->"bf05382d-0d13-4d98-8cd6-6f02a153910b"],
+Cell[32518, 888, 798, 19, 37, "Definition",ExpressionUUID->"4a817701-ef7f-4ce7-9372-8ac528a39e96"],
+Cell[33319, 909, 988, 23, 48, "Equation",ExpressionUUID->"c81e5eb3-cae9-4fba-bb73-b91107667c07"],
+Cell[34310, 934, 2553, 72, 95, "DefinitionContinuation",ExpressionUUID->"922be8e3-9fab-4d1b-9b9c-f1e0e745bf4b"],
+Cell[36866, 1008, 1179, 32, 52, "Equation",ExpressionUUID->"fa2fe1ec-d844-4640-8d79-204809da1f98"],
+Cell[38048, 1042, 328, 7, 36, "Text",ExpressionUUID->"9efda54a-fc84-4c19-b0e6-acd6e8e10e2c"],
+Cell[CellGroupData[{
+Cell[38401, 1053, 811, 24, 37, "Definition",ExpressionUUID->"6d2c7a23-78dd-4840-874c-b17734b3e9d5"],
+Cell[39215, 1079, 1037, 26, 67, "DefinitionContinuation",ExpressionUUID->"94fd3795-22ed-4788-93a6-d9361620e4d7"]
+}, Open  ]],
+Cell[40267, 1108, 769, 18, 64, "Text",ExpressionUUID->"884fa704-c71e-4a92-bdb8-3810145b83a5"],
+Cell[41039, 1128, 1451, 38, 65, "Definition",ExpressionUUID->"ac8d8880-6e49-44c7-a4bf-ca602986216e"],
+Cell[42493, 1168, 439, 11, 46, "Equation",ExpressionUUID->"ab1c52e4-eb0f-46c1-a309-3f1e0d234b3e"],
+Cell[42935, 1181, 271, 7, 54, "Equation",ExpressionUUID->"9d8ecbe7-b7c2-4b77-8a68-6336ba947fc6"],
+Cell[43209, 1190, 2460, 76, 66, "DefinitionContinuation",ExpressionUUID->"f507a6c2-d9e0-4e22-8092-9986287b30a7"],
+Cell[45672, 1268, 394, 8, 64, "Text",ExpressionUUID->"07411bc3-78c7-4a7f-8408-37c69b34eedd"],
+Cell[46069, 1278, 1360, 39, 37, "Definition",ExpressionUUID->"ef0936b0-f1d9-43f8-8e01-30e74a527f89"],
+Cell[47432, 1319, 392, 10, 46, "Equation",ExpressionUUID->"31a30910-f466-4574-bd8f-01b08aeecb9c"],
+Cell[47827, 1331, 369, 9, 52, "Equation",ExpressionUUID->"718ad4be-102e-426f-ac05-901853ead090"],
+Cell[48199, 1342, 1727, 45, 65, "DefinitionContinuation",ExpressionUUID->"2de53616-5ca8-4e24-a0db-0db58aed34e9"],
+Cell[49929, 1389, 553, 12, 46, "Equation",ExpressionUUID->"400f508b-aae3-42d7-aa43-78973ec0fda5"],
+Cell[50485, 1403, 1162, 33, 38, "DefinitionContinuation",ExpressionUUID->"7695be89-5aff-4bad-8c60-10d51908f8df"],
+Cell[51650, 1438, 1053, 28, 65, "Text",ExpressionUUID->"65c88f13-79b1-425c-8bf7-bde5736d313d"],
+Cell[52706, 1468, 269, 7, 46, "Equation",ExpressionUUID->"262117b5-40f4-4ce6-8c96-7d091118d2b8"],
+Cell[52978, 1477, 1026, 18, 118, "Text",ExpressionUUID->"5dc7a289-ab6d-4501-8555-43385627de8b"],
+Cell[54007, 1497, 914, 20, 91, "Text",ExpressionUUID->"53ec32fa-869a-4703-9d14-ea7a62bf3851"],
+Cell[54924, 1519, 1374, 40, 37, "Definition",ExpressionUUID->"14224502-fb0c-4958-8d38-11d9c4247c84"],
+Cell[56301, 1561, 452, 12, 46, "Equation",ExpressionUUID->"a76064cf-89fe-4982-b015-4bfb05412360"],
+Cell[56756, 1575, 2256, 59, 66, "DefinitionContinuation",ExpressionUUID->"df3c2711-176d-4f6b-828e-04a1efcaeb02"],
+Cell[59015, 1636, 5321, 135, 145, "Text",ExpressionUUID->"a45c1c7a-ae6e-41e0-a4c4-37a63ed9626c"],
+Cell[64339, 1773, 436, 8, 36, "Text",ExpressionUUID->"63bec7e5-5a3b-4a7d-a3aa-40b1aabf61bb"],
+Cell[64778, 1783, 617, 15, 37, "Example",ExpressionUUID->"237e7c61-acca-4d84-96e6-c438e9495a5f"],
+Cell[65398, 1800, 524, 15, 86, "Equation",ExpressionUUID->"c628358a-4db0-4d2e-a681-026f1e6ddfad"],
+Cell[65925, 1817, 3294, 91, 118, "ExampleContinuation",ExpressionUUID->"f6480e03-c8e7-4554-ba7d-9a3e2c8ea3aa"],
+Cell[69222, 1910, 1250, 36, 78, "Text",ExpressionUUID->"7c830bb2-2c11-400b-98bc-90878d9daaea"],
+Cell[70475, 1948, 911, 17, 64, "ExampleContinuation",ExpressionUUID->"9a79f7ff-33bb-49bd-ad5b-1a44cf20f48b"],
+Cell[71389, 1967, 735, 18, 46, "Equation",ExpressionUUID->"21c542d2-3948-4807-8942-b985cc586bf4"],
+Cell[72127, 1987, 1021, 29, 46, "Equation",ExpressionUUID->"424c083a-63f4-48a2-a72a-93fc0384bf06"],
+Cell[73151, 2018, 1164, 35, 46, "Equation",ExpressionUUID->"42df3670-e96c-4120-ae6f-fee13b66ad26"],
+Cell[74318, 2055, 1099, 31, 46, "Equation",ExpressionUUID->"76ccb832-ba06-4496-9840-814d54f85260"],
+Cell[75420, 2088, 631, 16, 46, "Equation",ExpressionUUID->"21ecaed4-aabd-4549-9e21-ee583a923cb9"],
+Cell[76054, 2106, 604, 16, 46, "Equation",ExpressionUUID->"7db075cd-519b-43c9-b063-9c020f3b2995"],
+Cell[76661, 2124, 691, 18, 46, "Equation",ExpressionUUID->"389e2854-662b-4af5-9b87-579269ae582b"],
+Cell[77355, 2144, 828, 21, 57, "Equation",ExpressionUUID->"e2a083b1-d90d-4ed5-9f46-e9302209a49f"],
+Cell[78186, 2167, 788, 20, 46, "Equation",ExpressionUUID->"87263e15-9902-42f9-8b63-bc243d3c3d3b"],
+Cell[78977, 2189, 770, 18, 46, "Equation",ExpressionUUID->"3ea9cde0-9c76-4ab9-a2a7-4b963f9605f2"],
+Cell[79750, 2209, 1008, 26, 46, "Equation",ExpressionUUID->"c6935c05-d71b-4d3e-9fbe-753b02531d0f"],
+Cell[80761, 2237, 928, 22, 46, "Equation",ExpressionUUID->"6d056f2c-3125-48f7-9d9e-156d3372a53d"],
+Cell[81692, 2261, 925, 22, 46, "Equation",ExpressionUUID->"886e9958-42d1-4379-8cf5-55921fa20892"],
+Cell[82620, 2285, 703, 14, 64, "ExampleContinuation",ExpressionUUID->"a6d3f293-a077-453e-bb93-17c5f1e2195e"],
+Cell[83326, 2301, 1013, 32, 46, "Equation",ExpressionUUID->"95f5673b-8a8b-4a5f-9cbb-65f56c7dcd3d"],
+Cell[84342, 2335, 1155, 36, 46, "Equation",ExpressionUUID->"0071b936-65f7-4f77-8c06-930747d44ebe"],
+Cell[85500, 2373, 1380, 46, 57, "Equation",ExpressionUUID->"b9e8bed7-606f-4e31-8c24-a83dd3061a15"],
+Cell[86883, 2421, 601, 12, 64, "ExampleContinuation",ExpressionUUID->"4ada6b5d-4ce7-428d-8cf1-e8d407461c4c"],
+Cell[87487, 2435, 1024, 25, 92, "Text",ExpressionUUID->"76cbdd43-0a30-40e5-ba19-60bafeb53846"],
+Cell[CellGroupData[{
+Cell[88536, 2464, 849, 23, 37, "Definition",ExpressionUUID->"36aecc57-5a5f-48fe-ac46-9681b4698731"],
+Cell[89388, 2489, 1966, 49, 120, "DefinitionContinuation",ExpressionUUID->"ac221d89-c0b0-449e-9d17-3775f1758b5b"]
+}, Open  ]],
+Cell[91369, 2541, 462, 9, 36, "Text",ExpressionUUID->"bf4c2a74-7ebf-4d75-80aa-2e686af40161"],
+Cell[91834, 2552, 846, 21, 37, "Definition",ExpressionUUID->"18e04457-55db-4095-a332-134b8050a33e"],
+Cell[92683, 2575, 426, 10, 46, "Equation",ExpressionUUID->"7877f518-d1fe-48d8-840f-b1f1a51c7faf"],
+Cell[93112, 2587, 426, 10, 55, "Equation",ExpressionUUID->"b4bbc75c-eefc-40e5-af34-8cdcc866f236"],
+Cell[93541, 2599, 1401, 39, 66, "DefinitionContinuation",ExpressionUUID->"ce217cca-d2f9-403a-ac38-a5bf73c088fd"],
+Cell[94945, 2640, 410, 8, 64, "Text",ExpressionUUID->"e4964fbe-370f-4f9a-b385-956b113ebfbb"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[95392, 2653, 202, 3, 84, "Section",ExpressionUUID->"becadd6c-c79d-4bea-93e8-306b8e1193dd"],
+Cell[95597, 2658, 513, 10, 36, "Text",ExpressionUUID->"3b886f9a-fdfb-4363-8966-c7670f709db2"],
+Cell[96113, 2670, 772, 20, 65, "Text",ExpressionUUID->"b814bf15-3239-4f54-b5da-58b9158e14d1"],
+Cell[96888, 2692, 612, 17, 49, "Equation",ExpressionUUID->"7e17d103-84a4-4996-a089-0b9c12699391"],
+Cell[97503, 2711, 786, 22, 36, "Text",ExpressionUUID->"99bc6f53-6879-48db-82ca-33baac4f8f17"],
+Cell[98292, 2735, 319, 6, 36, "Text",ExpressionUUID->"97d06bff-3212-4443-ab55-aa37969574c1"],
+Cell[98614, 2743, 394, 11, 37, "Definition",ExpressionUUID->"5e4dce2c-b32a-4115-8dfa-898b371b142e"],
+Cell[99011, 2756, 571, 15, 48, "Equation",ExpressionUUID->"5925d6ca-b587-46dd-992c-2b5d2b30bfd9"],
+Cell[CellGroupData[{
+Cell[99607, 2775, 1730, 37, 92, "DefinitionContinuation",ExpressionUUID->"482d46ff-6372-4b7c-962e-b1757ca68654"],
+Cell[101340, 2814, 919, 21, 36, "DefinitionContinuation",ExpressionUUID->"66d54a18-d7c6-425d-8dd8-10e5b151ca7c"]
+}, Open  ]],
+Cell[102274, 2838, 490, 9, 36, "Text",ExpressionUUID->"5ff3c94d-3576-4293-a06a-7b0e7be5acb1"],
+Cell[102767, 2849, 938, 25, 65, "Definition",ExpressionUUID->"25490302-8750-449a-88d3-885dcc472e3e"],
+Cell[103708, 2876, 570, 15, 55, "Equation",ExpressionUUID->"91092dfa-ef9e-4545-b081-ed132f4c107f"],
+Cell[104281, 2893, 612, 16, 66, "DefinitionContinuation",ExpressionUUID->"a6199344-9078-451a-a3d6-bea710d8d990"],
+Cell[104896, 2911, 370, 10, 46, "Equation",ExpressionUUID->"46827424-5b4d-4b20-aa80-1cb343f011a2"],
+Cell[105269, 2923, 592, 10, 36, "Text",ExpressionUUID->"9f5373dc-bf10-4d36-94ba-e80b20458b74"],
+Cell[105864, 2935, 520, 12, 37, "Definition",ExpressionUUID->"9dd84805-95d7-44d8-aaf5-b6d0ad2d9cf5"],
+Cell[106387, 2949, 684, 17, 46, "Equation",ExpressionUUID->"e3784f8f-a113-4968-b1d6-f22d71834e68"],
+Cell[107074, 2968, 668, 18, 65, "DefinitionContinuation",ExpressionUUID->"9ba92af1-1b6a-4bed-b93a-8bbab114e448"],
+Cell[107745, 2988, 790, 13, 91, "Text",ExpressionUUID->"84b28cbc-c37b-4ffe-90be-1b1484b57c3e"],
+Cell[108538, 3003, 733, 14, 64, "Text",ExpressionUUID->"a426fbd8-eb44-4fa0-942b-f8dcc13b2e34"],
+Cell[CellGroupData[{
+Cell[109296, 3021, 2276, 55, 120, "Definition",ExpressionUUID->"a0217062-c976-4d77-b90a-3d3c6729cc4b"],
+Cell[111575, 3078, 1220, 31, 65, "Definition",ExpressionUUID->"64ac8277-d294-4b89-a97f-e7f3697c31a4"]
+}, Open  ]],
+Cell[112810, 3112, 295, 8, 48, "Equation",ExpressionUUID->"ed23d81e-7f01-43af-9c29-0a2908cc8612"],
+Cell[113108, 3122, 295, 8, 48, "Equation",ExpressionUUID->"78388593-f44f-4cc7-8daa-c07361a0ddfb"],
+Cell[113406, 3132, 1520, 30, 92, "Text",ExpressionUUID->"f77b498d-bad4-48a4-8709-65195d32e893"],
+Cell[114929, 3164, 1559, 31, 93, "Definition",ExpressionUUID->"f4c528b5-46e7-4700-ae80-7a5641853143"],
+Cell[116491, 3197, 715, 16, 48, "Equation",ExpressionUUID->"48031c10-f279-4762-830c-b6268f10e4b7"],
+Cell[117209, 3215, 1282, 26, 92, "Text",ExpressionUUID->"d1cdbdee-d976-4bab-b9f2-682b97ad1711"],
+Cell[118494, 3243, 835, 23, 37, "Definition",ExpressionUUID->"413fc280-4aea-4b66-8244-5f1bae740ae9"],
+Cell[119332, 3268, 659, 15, 46, "Equation",ExpressionUUID->"64a58555-fbf5-47c0-b6f0-6f68a02979b6"],
+Cell[119994, 3285, 438, 9, 55, "Equation",ExpressionUUID->"91a7de82-5e37-4d29-b4af-cacae478a917"],
+Cell[120435, 3296, 2193, 50, 92, "Text",ExpressionUUID->"91a0d7a5-e586-42a8-9734-c71a89a15f64"],
+Cell[122631, 3348, 747, 20, 51, "Equation",ExpressionUUID->"f37d4dd6-4112-43ef-855d-96137f72599c"],
+Cell[123381, 3370, 1343, 31, 66, "Text",ExpressionUUID->"b1e635aa-2b10-459c-8095-11aa3c7336bf"],
+Cell[124727, 3403, 380, 10, 46, "Equation",ExpressionUUID->"205cc42c-e367-4a1a-9e45-1ebf0477275a"],
+Cell[125110, 3415, 1274, 32, 64, "Text",ExpressionUUID->"7016e2cc-8ab4-4994-bb9c-eeee12165351"],
+Cell[126387, 3449, 1787, 41, 94, "Text",ExpressionUUID->"36a6a9ce-af5a-4363-8a94-bfa06db10681"],
+Cell[128177, 3492, 1119, 31, 67, "Definition",ExpressionUUID->"743ed089-a215-4a97-b1bb-b0c0973dba34"],
+Cell[129299, 3525, 710, 18, 60, "Equation",ExpressionUUID->"95bc3456-46a2-4958-900d-463c91c4ba7c"],
+Cell[130012, 3545, 440, 10, 59, "Equation",ExpressionUUID->"075f8c6d-32d1-4e51-83ea-ed9baa630f07"],
+Cell[CellGroupData[{
+Cell[130477, 3559, 230, 4, 36, "DefinitionContinuation",ExpressionUUID->"bdd0370c-341d-4391-affa-c7b145b01c0d"],
+Cell[130710, 3565, 712, 11, 64, "DefinitionContinuation",ExpressionUUID->"c0003362-973c-432c-85eb-b792a005d5c4"],
+Cell[131425, 3578, 1627, 33, 120, "DefinitionContinuation",ExpressionUUID->"d47fe5ad-ed04-4a72-8515-7c309fb469ff"]
+}, Open  ]],
+Cell[133067, 3614, 999, 16, 145, "Text",ExpressionUUID->"440f444b-d5f1-4b28-8d45-acda61bbf7c9"],
+Cell[134069, 3632, 2515, 68, 98, "Definition",ExpressionUUID->"2a4ce40f-034f-4793-99b9-0dc8941c53af"],
+Cell[136587, 3702, 317, 9, 49, "Equation",ExpressionUUID->"1e9dabd0-4f0d-4e6b-8489-60ed42454fe7"],
+Cell[136907, 3713, 875, 22, 36, "DefinitionContinuation",ExpressionUUID->"a322cfc8-2eec-4eb4-b646-5db8201945b3"],
+Cell[137785, 3737, 548, 15, 90, "Equation",ExpressionUUID->"3ee4ee48-af5a-485b-82b1-1abbe969f49c"],
+Cell[CellGroupData[{
+Cell[138358, 3756, 2116, 57, 92, "DefinitionContinuation",ExpressionUUID->"6e575405-3e7d-486b-be80-baefb10a1dd4"],
+Cell[140477, 3815, 584, 10, 64, "DefinitionContinuation",ExpressionUUID->"b8cc7ea3-5fb4-423b-ae2f-f9e3b8416827"]
+}, Open  ]],
+Cell[141076, 3828, 262, 6, 36, "Text",ExpressionUUID->"d586399e-2586-47d2-9ba5-1939aec4a3d0"],
+Cell[141341, 3836, 489, 14, 49, "Equation",ExpressionUUID->"8310fe63-c511-407d-8b46-b19dbc53414c"],
+Cell[141833, 3852, 2397, 55, 161, "Text",ExpressionUUID->"d1b644ed-bcf0-4fea-9013-fe9930563d9d"],
+Cell[144233, 3909, 453, 10, 65, "Text",ExpressionUUID->"d8a96d52-86ac-41fb-9460-c5345c4fa0c9"],
+Cell[CellGroupData[{
+Cell[144711, 3923, 735, 15, 93, "Definition",ExpressionUUID->"4ae296d0-e549-4ccf-9093-6e5657ebc635"],
+Cell[145449, 3940, 879, 15, 119, "Definition",ExpressionUUID->"6d98d2a1-ecdf-4df0-8356-d24a53eab60a"]
+}, Open  ]],
+Cell[146343, 3958, 525, 9, 64, "Text",ExpressionUUID->"423145b4-3ee3-461a-8f57-0a11fdf1417f"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[146905, 3972, 223, 4, 84, "Section",ExpressionUUID->"8f1d4616-5d96-4fbc-bcef-8397c4660420"],
+Cell[147131, 3978, 551, 10, 64, "Text",ExpressionUUID->"781645a1-6fdb-441b-9609-2f75c32ee5ca"],
+Cell[147685, 3990, 858, 15, 91, "Text",ExpressionUUID->"ee854df2-e7aa-41b3-9730-b739c1ddfa1f"],
+Cell[148546, 4007, 756, 15, 66, "Text",ExpressionUUID->"efb8d4d9-e797-4cd6-ad97-27c89ddf5dbf"],
+Cell[149305, 4024, 630, 12, 92, "Acknowledgments",ExpressionUUID->"94344ab6-4bfd-498a-9aa4-6cdeab0c1625"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
