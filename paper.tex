@@ -35,25 +35,24 @@ and new algorithms. The brackets provide an elegant low-knowledge representation
 \hrule
 
 \section*{Introduction}
-During the long period of development of the research on automated theorem provers, there have already existed a great number of research and implementation on proofs focusing on a specific mathematical subject, such as algebra equations (for example, Wolfram Mathematica{'}s FindEquationProof function \cite{2}) or geometrical theorems (for example, the Geometry Expert or GEX \cite{3} of Key Laboratory of Mathematics Mechanization, Chinese Academy of Sciences). Some relatively new works in this aspect includes Microsoft{'}s Lean prover and Z3 prover.
+During the long period of development of the research on automated theorem provers, there have already existed a great number of research and implementation on proofs focusing on a specific mathematical subject, such as algebra equations (for example, Wolfram Mathematica{'}s FindEquationProof function \cite{2}) or geometrical theorems (for example, the Geometry Expert or GEX \cite{3} of Key Laboratory of Mathematics Mechanization, Chinese Academy of Sciences). Some relatively new works in this aspect includes Microsoft{'}s Lean prover and Z3 algorithm.
 
-However, if we investigate deeper into these algorithms, we will find the fact that all of these provers stand on the basis of logic theories. Both completely automated theorem provers and semi-automated computer auxiliary theorem provers like Coq and Isabelle, are designed to follow certain logic rules and generate results as logic formulas. Nevertheless, although we have to admit that such do is an effective method, this method also sets an insurmountable limit on the execution that the program could not think comprehensively such as solving an algebra problem in a geometrical way.
+However, if we investigate deeper into these algorithms, we will find the fact that all of these provers stand on the basis of logic theories. Both completely automated theorem provers and semi-automated computer auxiliary statement provers like Coq and Isabelle, are designed to follow certain logic rules and generate results as logic formulas. Nevertheless, although we have to admit that such do is an effective method, this method also sets an insurmountable limit on the execution that the program could not think comprehensively such as solving an algebra problem in a geometrical way.
 
-When we humans think of mathematical problems and perform proofs, we do not follow purely logical ways like complex stuff like Cooper{'}s algorithm. Instead, we just perform tries to seek breakthrough points using his knowledge in a diversified thought. Why cannot programs do things like that? Why cannot they perform some sort of knowledge transferring? Carry this question and in experimental and curious attitude, I conducted the research on this topic and have found a utility to do the task: the category theory.
+When we humans think of mathematical problems and perform proofs, we do not follow purely logical ways like complex stuff like Cooper{'}s algorithm. Instead, we just perform tries to seek breakthrough points using his knowledge in a diversified thought. Why cannot programs do things like that? Why can not they perform some sort of knowledge transferring? Carry this question and in experimental and curious attitude, I conducted the research on this topic and have found a utility to do the task: the category theory.
 
 Mainly developed in the twentieth century by the contribution of MacLane and Eilenberg with the purpose to investigate algebra topology, the category theory is a fast-evolving aspect of modern mathematics. In just a few decades, the category theory has become the standard and formal language of homology algebra and algebraic geometry and has gained a lot of meaningful achievements, for instance the Yoneda{'}s Lemma and Braid categories, which serves as a neat explanation for the Yang-Baxter Equation (YBE). Moreover, the category theory{'}s main idea, which is to put mathematical structures into categories satisfies the worldview of the Bourbaki school.
 
 In this paper I will present a new approach of automated proving using knowledge of the category, as well as its theoretical foundation, and will provide a new algorithm which can prove mathematical statements comprehensively. Additionally, an executable program and its implementation process will be describe later.
 
-\textit{ Structure of the paper.}
-
+\textit{ Structure of the paper.}\\
 The paper mainly consists of seven sections. The Introduction section demonstrates the background of the research and fundamental opinions around it. The Preliminaries section, made up of two subsections, claims to minimized pre-knowledge required to understand the paper and the symbols I select to use. The third section defines a set of mathematical structures that will be used by the algorithm. The forth section explains the detailed workflow procedures of the algorithm. The next section claims the conclusions of the research and the to-do improvements in the future. Finally the Acknowledgments section expresses my gratitude to the help and the References section claims the referential resources used while conducting the project.f
 
 \section*{Preliminaries}
 
 \subsection*{Notations and Conventions}
 
-To begin with, we use notation \(\mathcal{C}\) to demonstrate a category and use script\(\mathcal{F}\) to demonstrate a functor. \(\mathcal{U}\) stands for the Grothendieck universe selected and \(\mathcal{F}\mathit{o}\mathit{r}\) stands for the forgetful functor. A map is noted in one of the two following forms:
+To begin with, we use notation \(\mathcal{C}\) to demonstrate a category and use script\(\mathcal{F}\) to present a functor. \(\mathcal{U}\) stands for the Grothendieck universe selected and \(\mathcal{F}\mathit{o}\mathit{r}\) stands for the forgetful functor. A map is noted in one of the two following forms:
 
 \[f: A\to B\]
 \[x\mapsto y\]
@@ -182,8 +181,6 @@ Utilizing the structure expressed with Bracket, Notation and Symbol, mathematica
 \[\sum _{n=0}^{\infty } x^n=\frac{1}{1-x}, \text{for} |x|<1\]
 
 First, we need to observe what notation is needed by the construction. Apparently, we need to at least define these notations: \(\text{infinity}\), \(\text{integer}\), \(\text{number}\),\textit{  }\textit{ \(\sum\)}, \(=\), \({}^{\wedge}\), \(/\), \(-\), \(\text{abs}\), \(<\) and \(\text{for}\), where \(\text{abs}\) stands for the absolute value function. However, in this neat example, the concept of function is not needed to be defined. Additionally, as the constructed stuff only needs to demonstrate the equation itself instead of the principles behind the equality, there is no necessity for the definition of notation \(+\). Note that manifestly \(\text{integer} \triangleleft | \text{number}\). The table below demonstrates the number of parameters taken by the notations.
-
-
 
 \begin{table}
 	\centering
