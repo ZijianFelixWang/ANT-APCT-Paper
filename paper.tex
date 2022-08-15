@@ -7,6 +7,17 @@
 \hfuzz=2pt
 \special{dvipdfmx:config z 0} %% speed boost
 
+%% The commands below, learnt from TeX stack exchange can cancel the hbox overfull warning...
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\ps@pprintTitle
+{\fi\fi\fi\fi}
+{\fi\fi\fi\fi
+	\afterassignment\fix@elsarticle\let\@tempa}
+{}{\FailedToPatch}
+\def\fix@elsarticle{\iffalse{\fi}\romannumeral-`0}
+\makeatother
+
 %% \usepackage[letterpaper, total={5.3in, 9in}]{geometry}	%% set paper size & margin
 \usepackage{amsmath}	%% math part 1
 \usepackage{flexisym, breqn}	%% math part 2
@@ -31,24 +42,26 @@
 
 \begin{document}
 
-\title{A new type of automated prover based on category theory}
-\author[1]{Zijian Wang\fnref{fn1}}
-\ead{felix_wzj@yahoo.com}
-\ead[url]{zijianfelixwang.github.io}
-
-\fntext[fn1]{Author conducting the research, student of the Northeast Yucai School of P.R.China}
-
-\affiliation[1]{organization={Northeast Yucai School},addressline={Shiji Rd. 41, Hunnan},city={Shenyang},postcode={110000},country={P.R.China}}
-\maketitle
-
-\begin{abstract}
-In this article a new type of automated statement proof algorithm based on new data structures, i.e. brackets and map graphs
-and new algorithms is presented. The brackets provide an elegant low-knowledge representation of mathematical concepts. The map graphs offer an efficient machine-learning method which let the computer learn knowledge while proving. Additionally, the new finding is totally built on the category theory. Furthermore, a prototype of the program is given.
-\end{abstract}
-
-\begin{keyword}
-	automatic prover \sep theorem prover \sep algorithm \sep category theory \sep provers \sep statement prover
-\end{keyword}
+\begin{frontmatter}
+	\title{A new type of automated prover based on category theory}
+	\author[1]{Zijian Wang\fnref{fn1}}
+	\ead{felix_wzj@yahoo.com}
+	\ead[url]{zijianfelixwang.github.io}
+	
+	\fntext[fn1]{Author conducting the research, student of the Northeast Yucai School of P.R.China}
+	
+	\affiliation[1]{organization={Northeast Yucai School},addressline={Shiji Rd. 41, Hunnan},city={Shenyang},postcode={110000},country={P.R.China}}
+	%% \maketitle
+	
+	\begin{abstract}
+	In this article a new type of automated statement proof algorithm based on new data structures, i.e. brackets and map graphs
+	and new algorithms is presented. The brackets provide an elegant low-knowledge representation of mathematical concepts. The map graphs offer an efficient machine-learning method which let the computer learn knowledge while proving. Additionally, the new finding is totally built on the category theory. Furthermore, a prototype of the program is given.
+	\end{abstract}
+	
+	\begin{keyword}
+		automatic prover \sep theorem prover \sep algorithm \sep category theory \sep provers \sep statement prover
+	\end{keyword}
+\end{frontmatter}
 
 \section{Introduction}
 During the long period of development of the research on automated theorem provers, there have already existed a great number of research and implementation on proofs focusing on a specific mathematical subject, such as algebra equations (for example, Wolfram Mathematica{'}s FindEquationProof function \cite{Wolfram2019}) or geometrical theorems (for example, the Geometry Expert or GEX \cite{Gao1998} of Key Laboratory of Mathematics Mechanization, Chinese Academy of Sciences). Some relatively new works in this aspect includes Microsoft{'}s Lean prover \cite{Moura2021} and Z3 \cite{Moura2008} algorithm.
@@ -691,7 +704,7 @@ I express my sincerest gratitude to my tutor Prof. Shao Xinhui, the Yingcai Proj
 
 Additionally, I had few knowledge about \LaTeX before writing this paper. The $lshort$ documentation and the \TeX Stack Exchange helped me a lot. Here I express my genuine thankfulness to the online resources and documentation of the used \LaTeX packages and software components.
 
-\bibliographystyle{unsrt}
+\bibliographystyle{elsarticle-num}
 \bibliography{paper}
 
 \end{document}
