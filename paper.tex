@@ -5,7 +5,7 @@
 \documentclass[preprint]{elsarticle}
 
 \hfuzz=2pt
-\special{dvipdfmx:config z 0} %% speed boost
+%% \special{dvipdfmx:config z 0} %% speed boost
 
 %% The commands below, learnt from TeX stack exchange can cancel the hbox overfull warning...
 \usepackage{etoolbox}
@@ -44,19 +44,51 @@
 
 \begin{frontmatter}
 	\title{A new type of automated prover based on category theory}
-	\author[1]{Zijian Wang\fnref{fn1}}
+	
+	\author[1]{Shao Xinhui\corref{cor1}}
+	\ead{shaoxinhui@mail.neu.edu.cn}
+	
+	\author[2]{Zijian Wang\fnref{fn2}}
 	\ead{felix_wzj@yahoo.com}
 	\ead[url]{zijianfelixwang.github.io}
 	
-	\fntext[fn1]{Author conducting the research, student of the Northeast Yucai School of P.R.China}
+	\cortext[cor1]{Corresponding author, guiding the first author through the process of the research, professor of the Northerneastern University.}
 	
-	\affiliation[1]{organization={Northeast Yucai School},addressline={Shiji Rd. 41, Hunnan},city={Shenyang},postcode={110000},country={P.R.China}}
+	\fntext[fn2]{Author conducting the research, student of the Northeast Yucai School of P.R.China}
+	
+	\affiliation[1]{organization={Department of Mathematics, College of Sciences, Northerneastern University},city={Shenyang},postcode={110000},country={P.R.China}}
+	\affiliation[2]{organization={Northeast Yucai School},addressline={Zhenxing St. 9-5, Heping District},city={Shenyang},postcode={110000},country={P.R.China}}
 	%% \maketitle
 	
 	\begin{abstract}
 	In this article a new type of automated statement proof algorithm based on new data structures, i.e. brackets and map graphs
 	and new algorithms is presented. The brackets provide an elegant low-knowledge representation of mathematical concepts. The map graphs offer an efficient machine-learning method which let the computer learn knowledge while proving. Additionally, the new finding is totally built on the category theory. Furthermore, a prototype of the program is given.
 	\end{abstract}
+	
+	\begin{graphicalabstract}
+		\begin{figure}[h]
+			\begin{tikzpicture}[commutative diagrams/every diagram]
+				\node (K0) at (90:2.3cm) {$\mathcal{K}_0$};
+				\node (K1) at (90+72:2cm) {$\mathcal{K}_1$};
+				\node (K2) at (90+2*72:2cm) {$\mathcal{K}_2$};
+				\node (K3) at (90+3*72:2cm) {$\mathcal{K}_3$};
+				\node (Kn) at (90+4*72:2cm) {$\mathcal{K}_N$};
+				
+				\path[commutative diagrams/.cd, every arrow, every label]
+				(K0) edge node {$k_0$} (K1)
+				(K1) edge node {$K_1$} (K2)
+				(K2) edge node {$k_2$} (K3)
+				(K1) edge node {} (K3)
+				(K1) edge node {} (Kn)
+				(K0) edge node {} (K3);
+				
+				\path[commutative diagrams/.cd, every arrow, every label, dashed]
+				(K3) edge node {$K_3$} (Kn)
+				(Kn) edge node {} (K1)
+				(Kn) edge node {$k_N$} (K0);
+			\end{tikzpicture}
+		\end{figure}
+	\end{graphicalabstract}
 	
 	\begin{keyword}
 		automatic prover \sep theorem prover \sep algorithm \sep category theory \sep provers \sep statement prover
