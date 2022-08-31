@@ -28,6 +28,7 @@
 \usepackage{algorithmicx, algorithm, algpseudocode}	%% for pseudo code composition
 \usepackage{blindtext}	%% overfull hbox solution
 \usepackage{setspace}	%% double spacing
+\usepackage{url}	%% for reference 9
 
 \usetikzlibrary{positioning, cd, arrows}	%% for comutative diagram & flowchart drawing
 
@@ -46,7 +47,7 @@
 \begin{document}
 
 \begin{frontmatter}
-	\title{A new type of automated prover based on category theory}
+	\title{A new type of automated deduction algorithm based on category theory}
 	
 	\author[1]{Shao Xinhui\corref{cor1}}
 	\ead{shaoxinhui@mail.neu.edu.cn}
@@ -103,14 +104,14 @@ During the long period of development of the research on automated theorem prove
 
 However, if we investigate deeper into these algorithms, we will find the fact that all of these provers stand on the basis of logic theories. Both completely automated theorem provers and semi-automated computer auxiliary statement provers like Coq and Isabelle, are designed to follow certain logic rules and generate results as logic formulas. Nevertheless, although we have to admit that such do is an effective method, this method also sets an insurmountable limit on the execution that the program could not think comprehensively such as solving an algebra problem in a geometrical way.
 
-When we humans think of mathematical problems and perform proofs, we do not follow purely logical ways like complex stuff like Cooper{'}s algorithm. Instead, we just perform tries to seek breakthrough points using his knowledge in a diversified thought. Why cannot programs do things like that? Why can not they perform some sort of knowledge transferring? Carry this question and in experimental and curious attitude, I conducted the research on this topic and have found a utility to do the task: the category theory.
+When we humans think of mathematical problems and perform proofs, we do not follow purely logical ways like complex stuff like Cooper{'}s algorithm. Instead, we just perform tries to seek breakthrough points using his knowledge in a diversified thought. Why cannot programs do things like that? Why can not they perform some sort of knowledge transferring? Carry this question and in experimental and curious attitude, we conducted the research on this topic and have found a utility to do the task: the category theory.
 
 Mainly developed in the twentieth century by the contribution of MacLane and Eilenberg with the purpose to investigate algebra topology, the category theory is a fast-evolving aspect of modern mathematics. In just a few decades, the category theory has become the standard and formal language of homology algebra and algebraic geometry and has gained a lot of meaningful achievements, for instance the Yoneda{'}s Lemma and Braid categories, which serves as a neat explanation for the Yang-Baxter Equation (YBE) \cite{Li2019}. Moreover, the category theory{'}s main idea, which is to put mathematical structures into categories satisfies the worldview of the Bourbaki school.
 
-In this paper I will present a new approach of automated proving using knowledge of the category, as well as its theoretical foundation, and will provide a new algorithm which can prove mathematical statements comprehensively. Additionally, an executable program and its implementation process will be described later.
+In this paper we will present a new approach of automated proving using knowledge of the category, as well as its theoretical foundation, and will provide a new algorithm which can prove mathematical statements comprehensively. Additionally, an executable program and its implementation process will be described later.
 
 \textit{ Structure of the paper.}\\
-The paper mainly consists of seven sections. The Introduction section demonstrates the background of the research and fundamental opinions around it. The Preliminaries section, made up of two subsections, claims to minimized pre-knowledge required to understand the paper and the symbols I select to use. The third section defines a set of mathematical structures that will be used by the algorithm. The forth section explains the detailed workflow procedures of the algorithm. The next section claims the conclusions of the research and the to-do improvements in the future. Finally the Acknowledgments section expresses my gratitude to the help and the References section claims the referential resources used while conducting the project.
+The paper mainly consists of seven sections. The Introduction section demonstrates the background of the research and fundamental opinions around it. The Preliminaries section, made up of two subsections, claims to minimized pre-knowledge required to understand the paper and the symbols we select to use. The third section defines a set of mathematical structures that will be used by the algorithm. The forth section explains the detailed workflow procedures of the algorithm. The next section claims the conclusions of the research and the to-do improvements in the future. Finally the Acknowledgments section expresses my gratitude to the help and the References section claims the referential resources used while conducting the project.
 
 \section{Preliminaries}
 
@@ -520,7 +521,7 @@ Graphically, figure \ref{figure-1} illustrates the initial map.
 A morphism in this category means that if the reflection functor on its start is executed just now, then the target functor will be executed next time. That is, to be more specific, if a functor in \(\mathcal{Q}\) has no morphisms targeting it, then it will be never executed unless it is configured as the beginning functor (location \(0\)) manually. Moreover, if a functor has more than one morphisms starting from it, then we call this functor \textbf{ extroverted}. Otherwise, if a functor has more than one morphisms targeting it, it is \textbf{ introverted}. If one has only two morphisms connected, one in and one out, thus it is\textbf{  ordinary}. The process of determining the next functor of a extroverted functor will be discussed below.
 \end{definition}
 
-The definition below describes how the recursive functor uses the knowledge base and the further evolution for the data structure of the knowledge base. It ought to be paid attention to that although in the Introduction part that I say this new method of implementing a prover makes the prover low-knowledge and it turns out to have an infrastructure called the knowledge base. This is not conflictual since the knowledge I mean by in the Introduction section means the algorithm is automated, which means it does not require users to give in too much assistance and it does not know exactly what is under manipulation. On the other hand, however, the knowledge word here means by the storage of reflections, which can be rules, axioms, theorems, lemmas and even strategies.
+The definition below describes how the recursive functor uses the knowledge base and the further evolution for the data structure of the knowledge base. It ought to be paid attention to that although in the Introduction part that we say this new method of implementing a prover makes the deduction algorithm low-knowledge and it turns out to have an infrastructure called the knowledge base. This is not conflictual since the knowledge we mean by in the Introduction section means the algorithm is automated, which means it does not require users to give in too much assistance and it does not know exactly what is under manipulation. On the other hand, however, the knowledge word here means by the storage of reflections, which can be rules, axioms, theorems, lemmas and even strategies.
 
 %% \pmb{ Definition. }
 \begin{definition}
@@ -536,7 +537,7 @@ The definition below describes how the recursive functor uses the knowledge base
 		w = (\mathit{r} \bmod \sum _{u=0}^N )\left|\text{Hom}_{\mathcal{Q}}\left(\mathcal{K}_j,\mathcal{K}_q\right)\right|
 	\end{equation}
 	
-	It is easy to understand that for each reflection functor \(\mathcal{K}_a\) and \(\mathcal{K}_b\), the count of set \(\text{Hom}_{\mathcal{Q}}\left(\mathcal{K}_a,\mathcal{K}_b\right)\) indicates the \textbf{ weight} of \(\mathcal{K}_b\) to \(\mathcal{K}_a\), controlling the probability of \(\mathcal{K}_b\) to be selected when the former functor is \(\mathcal{K}_a\). The design of this process is inspired by the lottery scheduling algorithm I learned in Andrew S. Tanenbaum{'}s Operating Systems: Design and Implementation \cite{Tanenbaum2015} before.
+	It is easy to understand that for each reflection functor \(\mathcal{K}_a\) and \(\mathcal{K}_b\), the count of set \(\text{Hom}_{\mathcal{Q}}\left(\mathcal{K}_a,\mathcal{K}_b\right)\) indicates the \textbf{ weight} of \(\mathcal{K}_b\) to \(\mathcal{K}_a\), controlling the probability of \(\mathcal{K}_b\) to be selected when the former functor is \(\mathcal{K}_a\). The design of this process is inspired by the lottery scheduling algorithm we learned in Andrew S. Tanenbaum{'}s Operating Systems: Design and Implementation \cite{Tanenbaum2015} before.
 \end{definition}
 
 An issue that worth attention is that as the random generator is defined as the following recursion formula: \cite{Entacher1997}
@@ -723,21 +724,22 @@ Via the process we described in the forth section and the data structures we pre
 
 \section{Conclusions and Future Work}
 
-In the sections before I have presented an elegant data structure for representing mathematical concepts and a neat process which utilizes category theory concepts and knowledge to conduct proof, which also have self-optimiza-tion features.
+In the sections before we have presented an elegant data structure for representing mathematical concepts and a neat process which utilizes category theory concepts and knowledge to conduct proof, which also have self-optimiza-tion features.
 
-Currently I have developed a computer program called DefQed that implements the algorithm and it is open-sourced with BSD 3-Clause {``}New{''} or {``}Revised{''} License on GitHub. The source code of the latest version can be accessed at \cite{Wang2022} It should be noted that the version is very early and some aspects of the algorithm I presented in the paper is not implemented.
+Currently we have developed a computer program called DefQed that implements the algorithm and it is open-sourced with BSD 3-Clause {``}New{''} or {``}Revised{''} License on GitHub. The source code of the latest version can be accessed at \cite{Wang2022} It should be noted that the version is very early and some aspects of the algorithm we presented in the paper is not implemented.
 
 Future works are the followings below:
 \begin{itemize}
-	\item \textbf{Continuing the implementation of the corresponding software.} Currently the software I developed is still under immature development and a great many of the aspects I presented in the paper above, including the self-evolution logic, have not been constructed yet.
-	\item  \textbf{Improving the algorithm.} The algorithm I presented in the paper is not mature. For instance, if the knowledge base has more than \(2^{32}\) morphisms, then some of the morphisms will never be utilized.
+	\item \textbf{Continuing the implementation of the corresponding software.} Currently the software we developed is still under immature development and a great many of the aspects we presented in the paper above, including the self-evolution logic, have not been constructed yet.
+	\item  \textbf{Improving the algorithm.} The algorithm we presented in the paper is not mature. For instance, if the knowledge base has more than \(2^{32}\) morphisms, then some of the morphisms will never be utilized.
 	\item \textbf{Optimizing the algorithm.} Currently, though the design of the procedures increase generality because of the low-knowledge feature, the performance of derivations may be lower than the current algorithms, which focus on a certain subject inside mathematics.
 \end{itemize}
 
 \section{Acknowledgments}
 I express my sincerest gratitude to my tutor Prof. Shao Xinhui, the Yingcai Project of P.R.China, which enables senior high school students to conduct science research, my senior high academy Northeast Yucai School (NEYC) of P.R.China and the corresponding university Northern Eastern University (NEU) of P.R.China. I also thank my parents for encouraging me to conduct this research project.
 
-Additionally, I had few knowledge about \LaTeX before writing this paper. The $lshort$ documentation and the \TeX Stack Exchange helped me a lot. Here I express my genuine thankfulness to the online resources and documentation of the used \LaTeX packages and software components.
+Additionally, I had few knowledge about \LaTeX before writing this paper. The $lshort$ documentation and the \TeX Stack Exchange helped me a lot. Here I express my genuine thankfulness to the online resources and documentation of the used \LaTeX packages and software components. This research did not receive any specific grant from funding agencies in the public, commercial, or
+not-for-profit sectors.
 
 \bibliographystyle{elsarticle-num}
 \bibliography{paper}
