@@ -1,0 +1,149 @@
+\documentclass{aims}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{txfonts}
+\def\typeofarticle{Type of article}
+\def\currentvolume{7}
+\def\currentissue{x}
+\def\currentyear{2022}
+\def\currentmonth{Received date 1 July 2016, Accepted date 6 September}
+\def\ppages{xxx--xxx}
+\def\DOI{10.3934/math.2022xxx}
+\def\Received{July 2021}
+\def\Revised{August 2021}
+\def\Accepted{September 2021}
+\def\Published{December 2021}
+
+
+\numberwithin{equation}{section}
+\DeclareMathOperator*{\essinf}{ess\,inf}
+\makeatletter
+\renewcommand{\@biblabel}[1]{#1\hfill \hspace{-0.2cm}}
+\makeatother
+
+
+\newcommand{\ep}{\varepsilon}
+\newcommand{\eps}[1]{{#1}_{\varepsilon}}
+
+\begin{document}
+
+\title{The full title of your paper}
+
+\author{%
+  First name Last name\affil{1}
+  First name Last name\affil{2}
+  and
+  First name Last name\affil{1,}\corrauth
+}
+
+% \shortauthors is used in copyright information in the end of the paper
+\shortauthors{the Author(s)}
+
+\address{%
+  \addr{\affilnum{1}}{Department of Mathematics, Missouri State University, 901 S. National, Springfield, MO 65897, USA}
+  \addr{\affilnum{2}}{Affiliation}}
+
+% corresponding author
+\corraddr{Email address of corresponding author; Tel: +1-111-111-1111;\\
+ Fax: +1-111-111-1111.
+}
+
+\begin{abstract}
+An abstract is a brief of the paper; the abstract should not 
+contain references, the text of the abstract section should be
+in 12 point normal Times New Roman.
+\textbf{(200 to 300 words)}
+\end{abstract}
+
+\keywords{
+\textbf{(5 to 10 keywords)}
+\newline
+\textbf{Mathematics Subject Classification:} xxx, xxx}
+
+\maketitle
+
+\section{Introduction}
+
+Please use the AIMS template to prepare your manuscript, 
+before you submit to our journal. 
+Please read carefully the instructions for authors at
+http://www.aimspress.com \cite{authour1}. 
+These are important instructions and explanations. 
+Thank you for your cooperation.
+
+
+\section{Materials and methods}
+\subsection{Subheading}
+
+\subsubsection{Sub-subheading}
+The heading levels should not be more than 4 levels. 
+The font of heading and subheadings should be 12 point 
+normal Times New Roman. The first letter of headings 
+and subheadings should be capitalized.
+
+\section{Results}
+The body text is in 12 point normal Times New Roman, 
+the line space is at least 15 point.
+ 
+\begin{table}[H]
+\begin{center}
+\caption{Caption of the table.}
+\begin{tabular}{ccc} \hline
+ & & \\\hline
+ & & \\
+ & & \\
+ & & \\\hline
+ &(Table body should be created by MS word table function; three-line table is preferred.)
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.8]{figure.pdf}
+\caption{Legend of the figure.}
+\label{Fig1}
+\end{center}
+\end{figure}
+
+\begin{equation}
+  \text{[add an equation here; use MS Word or MathType equation function]}
+\end{equation}
+
+\section{Discussion}
+
+\section{Conclusions}
+
+\section*{Acknowledgments (All sources of funding of the study must be disclosed)}
+We would like to thank you for following the instructions above 
+very closely in advance. It will definitely save us lot of 
+time and expedite the process of your paper's publication.
+
+\section*{Conflict of interest}
+
+\begin{thebibliography}{999}
+
+\bibitem{authour1}[10.1090/S0894-0347-1992-1124979-1]
+      \textbf{Journal article style:} Y. Benoist, P. Foulon, F. Labourie,  {Anosov flows with stable and unstable differentiable distributions},
+     \newblock  {\it J. Amer. Math. Soc.,}
+     \newblock  \textbf{Volume} (year), StaringPage-Ending Page. \doilink{http://dx.doi.org/10.1090/S0894-0347-1992-1124979-1}
+
+
+\bibitem{authour2}[10.1016/B978-0-12-775850-3.50017-0]
+     \textbf{Book style:}
+    \newblock J. Serrin, {\em Gradient estimates for solutions of nonlinear elliptic and parabolic equations}, 
+    \newblock  2 Eds., New York: Academic Press, 1971. \doilink{http://dx.doi.org/10.1016/B978-0-12-775850-3.50017-0}
+
+
+\bibitem{authour3}
+     \textbf{Online content:}
+    \newblock  {\it SARS Expert Committee, SARS in Hong Kong: From Experience to Action}, Hong Kong SARS Expert Committee, 2003. Available from: \\ \url{http://www.sars-expertcom.gov.hk/english/reports/reports.html.} 
+
+\end{thebibliography}
+
+
+For more questions regarding reference style, please refer to the \href{http://www.ncbi.nlm.nih.gov/books/NBK7256/}{Citing Medicine}.
+
+\section*{Supplementary (if necessary)}
+
+\end{document}
