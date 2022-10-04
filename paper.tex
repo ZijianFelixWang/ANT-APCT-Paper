@@ -17,8 +17,11 @@
 \usepackage{setspace}	%% double spacing
 \usepackage{url}	%% for reference 9
 \usepackage[pagewise]{lineno}\linenumbers
+\usepackage[comma, square, sort, numbers]{natbib}
 
 \usetikzlibrary{positioning, cd, arrows, celtic}	%% for comutative diagram & flowchart drawing
+
+\renewcommand{\bibnumfmt}[1]{[#1]}
 
 \def\typeofarticle{}
 \def\currentvolume{}
@@ -50,6 +53,8 @@
 \numberwithin{definition}{section}	%% count definitions
 
 %\pdfminorversion=7
+
+%\bibliographystyle{unsrt}
 
 \begin{document}
 	\title{A new type of generalized, self-evolving and efficient automated deduction algorithm based on category theory}
@@ -474,7 +479,7 @@
 		
 		Graphically, figure \ref{figure-1} illustrates the initial map.
 		
-		\begin{figure}[h]
+		\begin{figure}[ht]
 			\centering
 			\begin{tikzpicture}[commutative diagrams/every diagram]
 				\node (K0) at (90:2.3cm) {$\mathcal{K}_0$};
@@ -605,7 +610,7 @@
 	
 	To summarize, we can illustrate the entire process of the workflow of the algorithm with the following diagram on the next page (figure \ref{figure-3}).
 	
-	\begin{figure}[h]
+	\begin{figure}[ht]
 		\centering
 		\begin{tikzpicture}[>=latex', font={\sf \small}]
 			\def\smbwd{1cm}
@@ -722,6 +727,7 @@
 	This research did not receive any specific grant from funding agencies in the public, commercial, or
 	not-for-profit sectors.
 	
-	\bibliographystyle{plain}
+%	\bibliography{paper}
+	\bibliographystyle{unsrtnat}
 	\bibliography{paper}
 \end{document}
