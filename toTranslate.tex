@@ -58,27 +58,28 @@
 
 \begin{document}
 	\title{A new type of generic, self-evolving and efficient automated deduction algorithm based on category theory}
-	\author{%
-		Zijian Wang\affil{1}
-		Shao Xinhui\affil{*}
-	}
-	\shortauthors{the Authors}
-	\address{%
-		\addr{\affilnum{1}}{Northeast Yucai School, Zhenxing St. 9-5, Heping District, Shenyang, Liaoning, P.R.China. Email: felix\_wzj@yahoo.com}
-		\corraddr{Department of Mathematics, College of Sciences, Northerneastern University, Shenyang, Liaoning, P.R.China. Email: shaoxinhui@mail.neu.edu.cn}
-	}
-
+	 
+    The authors' names are deleted.
+    \author{%
+    	Z\affil{1}
+    	S\affil{*}
+    }
+    \shortauthors{the Authors}
+    \address{%
+    	\addr{\affilnum{1}}{N}
+    	\corraddr{D}
+    }
+	
 	\begin{abstract}
-	In this article a new type of generalized, self-evolving and efficient automated statement proof algorithm based on new data structures, i.e. brackets and map graphs
-	and new algorithms is presented. The brackets structure provides an elegant low-knowledge representation of mathematical concepts. The map graphs offer an efficient machine-learning method which let the computer learn knowledge while proving. Additionally, the new finding is totally built on the category theory. Furthermore, a prototype of the program is given and examined for performance.
+		Abstract deleted for privacy.
 	\end{abstract}
-
+	
 	\keywords{
 		\textbf{automatic prover, theorem prover, algorithm, category theory, automatic deduction, automatic reasoning}
 		\newline
 		\textbf{Mathematics Subject Classification:} 03B35, 68V15, 18-00, 18-04, 68W99
 	}
-
+	
 	\maketitle
 	
 	\section{Introduction}
@@ -271,55 +272,18 @@
 		\sum _{n=0}^{\infty } x^n=\frac{1}{1-x}, \text{for} |x|<1
 	\end{equation*}
 	
-	First, we need to observe what notation is needed by the construction. Apparently, we need to at least define these notations: \(\text{inf}\), \(\text{int}\), \(\text{num}\),\textit{  }\textit{ \(\sum\)}, \(=\), \({}^{\wedge}\), \(/\), \(-\), \(\text{abs}\), \(<\) and \(\text{for}\), where \(\text{abs}\) stands for the absolute value function. However, in this neat example, the concept of function is not needed to be defined. Additionally, as the constructed stuff only needs to demonstrate the equation itself instead of the principles behind the equality, there is no necessity for the definition of notation \(+\). Note that manifestly \(\text{int} \triangleleft | \text{num}\). The table below (\ref{table-1}) demonstrates the number of parameters taken by the notations.
+	First, we need to observe what notation is needed by the construction. Apparently, we need to at least define these notations: \(\text{inf}\), \(\text{int}\), \(\text{num}\),\textit{  }\textit{ \(\sum\)}, \(=\), \({}^{\wedge}\), \(/\), \(-\), \(\text{abs}\), \(<\) and \(\text{for}\), where \(\text{abs}\) stands for the absolute value function. However, in this neat example, the concept of function is not needed to be defined. Additionally, as the constructed stuff only needs to demonstrate the equation itself instead of the principles behind the equality, there is no necessity for the definition of notation \(+\). Note that manifestly \(\text{int} \triangleleft | \text{num}\). The table below (ref{table-1}) demonstrates the number of parameters taken by the notations.
 	
-	\begin{table}[h]
-		\centering
-		\caption{The table for $\mathit{p}(\mathcal{N})$}
-		\begin{tabular}{ccccccccccc}
-			\toprule
-			$\mathcal{N}$ & int & num & inf & $\sum$ & $=$ & $/$ & - & abs & $<$ & for \\
-			\midrule
-			$\mathit{p}$ & $0$ & $0$ & $0$ & $3$ & $2$ & $2$ & $2$ & $1$ & $2$ & $2$ \\
-			\bottomrule
-		\end{tabular}
-		\label{table-1}
-	\end{table}
-	
+	table 1 here.
+
 	Significantly there are three types and seven operators. In the expressions, symbols are displayed bold for recognition from ordinals, although this
 	is actually not necessary. Bracket \(\alpha\) is the result of construction. Then just like constructing a polish expression, we construct:
 	
-	\begin{equation*}
-		\begin{aligned}
-			\pmb{1} &\in& \text{Ob}(\text{Sym}(\mathcal{C}))\land \mathit{v}(\pmb{1})=\text{number}\\
-			\pmb{\infty } &\in& \text{Ob}(\text{Sym}(\mathcal{C}))\land \mathit{v}(\pmb{\infty })=\text{infinity}\\
-			\pmb{x} &\in& \text{Ob}(\text{Sym}(\mathcal{C}))\land \mathit{v}(\pmb{x})=\text{number}\\
-			\pmb{n} &\in& \text{Ob}(\text{Sym}(\mathcal{C}))\land \mathit{v}(\pmb{n})=\text{integer}\triangleleft |\text{number}\\
-		\end{aligned}
-	\end{equation*}
-	\begin{equation*}
-		\begin{aligned}
-			\alpha &=& \{(0,\text{for}),(1,\beta ),(2,\gamma )\}\\
-			\beta &=& \{(0,=),(1,\delta ),(2,\epsilon )\}\\
-			\gamma &=& \{(0,<),(1,\zeta ),(2,\pmb{1})\}\\
-			\delta &=& \{(0,\sum ),(1,\eta ),(2,\pmb{\infty }), (3,\theta )\}\\
-			\epsilon &=& \{(0,/),(1,\pmb{1}),(2,\iota )\}\\
-			\zeta &=& \{(0,\text{abs}),(1,\pmb{x})\}\\
-			\eta &=& \{(0,=),(1,\pmb{n}),(2,\pmb{1})\}\\
-			\theta &=& \{(0,{}^{\wedge}),(1,\pmb{x}),(2,\pmb{n})\}\\
-			\iota &=& \{(0,-),(1,\pmb{1}),(2,\pmb{x})\}
-		\end{aligned}
-	\end{equation*}
+	equations here.
 	
 	This may look a bit messy but nevertheless we can combine the simple brackets together and form larger brackets in the form shown as below. Declaration of the four symbols are omitted. Bracket \(\alpha\) is the result of construction.
 	
-	\begin{equation}
-		\begin{split}
-			\alpha = \{(0,\text{for}),(1,\beta ),(2,\{(0,<),(1,\{(0,\text{abs}),\\(1,\pmb{x})\}),(2,\pmb{1})\})\}\hfill\\
-			\beta = \{(0,=),(1,\delta ),(2,\{(0,/),(1,\pmb{1}),(2,\{(0,-),\\(1,\pmb{1}),(2,\pmb{x})\})\})\}\hfill\\
-			\delta = \{(0,\sum ),(1,\{(0,=),(1,\pmb{n}),(2,\pmb{1})\}),(2,\pmb{\infty }), (3,\\\{(0,{}^{\wedge}),(1,\pmb{x}),(2,\pmb{n})\})\}\hfill\\
-		\end{split}
-	\end{equation}
+	equations here.
 	
 	It is still possible to combine all into a large bracket definition for \(\alpha\) but in that way it may be even harder for people to understand, although altogether no difference for algorithms and programs. (The example ends here.)
 	
@@ -338,12 +302,7 @@
 	\begin{definition}
 		An evaluation is a morphism from \(\text{Mic}(\mathcal{C})\) to a Boolean algebra \(\mathcal{B}\) with the form below.
 		
-		\begin{equation}
-			\begin{gathered}
-				\mathit{e}\mathit{v}\mathit{a}\ell :\text{Ob}(\text{Mic}(\mathcal{C}))\to \mathcal{B}\\
-				\mathit{m}\overset{\mathit{e}\mathit{v}\mathit{a}\ell }{\mapsto }\mathit{e}\mathit{v}\mathit{a}\ell (\mathit{m})
-			\end{gathered}
-		\end{equation}
+		equations here.
 		
 		The Boolean value \(\mathit{e}\mathit{v}\mathit{a}\ell (\mathit{m})\in \{0,1\}\) is called the \textbf{ evaluation result} of micro-statement. If for bracket \(\mathit{m}\) exists a morphism to \(\mathcal{B}\) that satisfies the definition of evaluation, then we say that \(\mathit{m}\) is \textbf{ evaluatable}. That is, if it satisfies the first restriction of being a micro-statement as well, it is a micro-statement.
 	\end{definition}
@@ -476,29 +435,9 @@
 			\end{gathered}
 		\end{equation}
 		
-		Graphically, figure \ref{figure-1} illustrates the initial map.
+		Graphically, figure ref{figure-1} illustrates the initial map.
 		
-		\begin{figure}[ht]
-			\centering
-			\begin{tikzpicture}[commutative diagrams/every diagram]
-				\node (K0) at (90:2.3cm) {$\mathcal{K}_0$};
-				\node (K1) at (90+72:2cm) {$\mathcal{K}_1$};
-				\node (K2) at (90+2*72:2cm) {$\mathcal{K}_2$};
-				\node (K3) at (90+3*72:2cm) {$\mathcal{K}_3$};
-				\node (Kn) at (90+4*72:2cm) {$\mathcal{K}_N$};
-				
-				\path[commutative diagrams/.cd, every arrow, every label]
-				(K0) edge node {$k_0$} (K1)
-				(K1) edge node {$K_1$} (K2)
-				(K2) edge node {$k_2$} (K3);
-				
-				\path[commutative diagrams/.cd, every arrow, every label, dashed]
-				(K3) edge node {$K_3$} (Kn)
-				(Kn) edge node {$k_N$} (K0);
-			\end{tikzpicture}
-			\caption{The initial map.}
-			\label{figure-1}
-		\end{figure}
+		figure 1 here.
 		
 		A morphism in this category means that if the reflection functor on its start is executed just now, then the target functor will be executed next time. That is, to be more specific, if a functor in \(\mathcal{Q}\) has no morphisms targeting it, then it will be never executed unless it is configured as the beginning functor (location \(0\)) manually. Moreover, if a functor has more than one morphisms starting from it, then we call this functor \textbf{ extroverted}. Otherwise, if a functor has more than one morphisms targeting it, it is \textbf{ introverted}. If one has only two morphisms connected, one in and one out, thus it is\textbf{  ordinary}. The process of determining the next functor of a extroverted functor will be discussed below.
 	\end{definition}
@@ -532,39 +471,7 @@
 	
 	The more detailed explanation of the recursive functor can be found in the algorithm below (Algorithm 1).
 	
-	\begin{algorithm}[h!]
-		\caption{Pseudo code for recursive functor $\mathcal{F}_t$}
-		\begin{algorithmic}[1]
-			\Require Pool $\mathcal{M}_{t}$, Knowledge base $\mathcal{Q}$, random $\mathit{r}$, Just used reflection functor index $i$
-			\Ensure Next pool $\mathcal{M}_{t+1}$
-			
-			\Function{$\mathcal{F}_t$}{$\mathcal{M}_t$, $\mathcal{Q}$, $\mathit{r}$, $i$}
-			\Comment{This is the sub-process}
-			\State $\mathcal{K} \gets $ \Call{SelectReflectionFunctor}{$\mathcal{Q}$, $\mathit{r}$, $i$}
-			%% \State \Return \Call{Reflect}{$\mathcal{K}$, $\mathcal{M}_{t}$}
-			\State \Return $\mathcal{K} \mathcal{M}_t$
-			\Comment{Apply functor $\mathcal{K}$ to pool}
-			\EndFunction
-			
-			\Function{SelectReflectionFunctor}{$\mathcal{Q}$, $\mathit{r}$, $i$}
-			\Comment{Just used: $\mathcal{K}_i \in \text{Ob(}\mathcal{Q}\text{)}$}
-			\State $M \gets Mor(\mathcal{Q})$
-			\ForAll{$m \in M$}
-			\Comment{Get morphisms starting at $\mathcal{K}_i$}
-			\If{$s(m) != \mathcal{K}_i$}
-			\State $M \gets M \backslash \{m\}$
-			\EndIf
-			\EndFor
-			\If{$|M|==1$}
-			\Comment{The easiest condition}
-			\State \Return $t(m \in M)$
-			\Else
-			\State $n \gets \mathit{r} \% |M|$
-			\State \Return $t(n)$
-			\EndIf
-			\EndFunction
-		\end{algorithmic}
-	\end{algorithm}
+	algorithm 1 here.
 	
 	Note that we use the statement $\mathcal{K} \mathcal{M}_t$ to represent applying functor $\mathcal{K}$ to category $\mathcal{M}_t$ and get the result category. The detailed steps of the functor execution can be found before in the place of defining the stuff.
 	
@@ -577,130 +484,15 @@
 		The second step of this sort of reinforcement is called \textbf{ reduction}, which is based on the Ebbinghaus{'}s forgetful curve{'}s numerical fit function. The exact form of the function expression can be found in the Preliminary section. Specifically, the number of morphisms is decreased following the forgetful equation, changing into the nearest integer number. To be more explicit, the Ebbinghaus-reduced decimal is stored separately from the knowledge base and the exact and accurate representation for this is omitted in the paper.
 	\end{definition}
 	
-	A situation after some reinforcements may be the one demonstrated in figure \ref{figure-2}.
+	A situation after some reinforcements may be the one demonstrated in figure ref{figure-2}.
 	
-	\begin{figure}[h!t]
-		\centering
-		\begin{tikzpicture}[commutative diagrams/every diagram]
-			\node (K0) at (90:2.3cm) {$\mathcal{K}_0$};
-			\node (K1) at (90+72:2cm) {$\mathcal{K}_1$};
-			\node (K2) at (90+2*72:2cm) {$\mathcal{K}_2$};
-			\node (K3) at (90+3*72:2cm) {$\mathcal{K}_3$};
-			\node (Kn) at (90+4*72:2cm) {$\mathcal{K}_N$};
-			
-			\path[commutative diagrams/.cd, every arrow, every label]
-			(K0) edge node {$k_0$} (K1)
-			(K1) edge node {$K_1$} (K2)
-			(K2) edge node {$k_2$} (K3)
-			(K1) edge node {} (K3)
-			(K1) edge node {} (Kn)
-			(K0) edge node {} (K3);
-			
-			\path[commutative diagrams/.cd, every arrow, every label, dashed]
-			(K3) edge node {$K_3$} (Kn)
-			(Kn) edge node {} (K1)
-			(Kn) edge node {$k_N$} (K0);
-		\end{tikzpicture}
-		\caption{An example map after several reinforcements.}
-		\label{figure-2}
-	\end{figure}
+	figure 2 here.
 	
 	Readers may notify that that \(\mathcal{K}_1\) has a morphism targeting \(\mathcal{K}_N\) and \(\mathcal{K}_N\) also has a morphism targeting \(\mathcal{K}_1\). This consequence is normal and natural following the evolution. Another possible issue is that after some recursions, there may exist some stuff whose weight is below the least acceptable numerical, that is, they are \textbf{totally forgotten}. Well, in such condition, they will be absolutely no recursion involving them. The only way to restore their activity is to reconfigure their parameter manually.
 	
-	To summarize, we can illustrate the entire process of the workflow of the algorithm with the following diagram on the next page (figure \ref{figure-3}).
+	To summarize, we can illustrate the entire process of the workflow of the algorithm with the following diagram on the next page (figure ref{figure-3}).
 	
-	\begin{figure}[ht]
-		\centering
-		\begin{tikzpicture}[>=latex', font={\sf \small}]
-			\def\smbwd{1cm}
-			
-			\node (start) at (0,0) [draw, terminal,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {Start};
-			
-			\node (parse) at (0,-1.5) [draw, process,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {Get task from user};
-			
-			\node (l-pool) at (-2,-3) [draw, storage,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {$\mathcal{M}_t$};
-			
-			\node (r-pool) at (2,-3) [draw, storage,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {$\mathcal{R}$};
-			
-			\node (rec-functor) at (-2,-4.5) [draw, predproc,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {$\mathcal{F}_t$};
-			
-			\node (random) at (-4,-4.5) [draw, process,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {$\mathit{r}$};
-			
-			\node (k-base) at (2,-4.5) [draw, storage,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {KBase $\mathcal{Q}$};
-			
-			\node (success-val) at (0,-6) [draw, process,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {$s = {\exists n\in [0,\omega ), \mathcal{R}\subseteq \text{Ob}\left(\mathcal{M}_n\right)}$};
-			
-			\node (success-check) at (0,-7.5) [draw, decision,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {$s$};
-			
-			\node (reinforcement) at (2,-9) [draw, predproc,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {Reinforcement};
-			
-			\node (write-rh) at (-2,-9) [draw, process,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {Generate steps};
-			
-			\node (steps) at (-4,-9) [draw, storage,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {Steps};
-			
-			\node (forgetful-para) at (2,-7.5) [draw, process,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {$E(\mathit{t})$};
-			
-			\node (end) at (0,-10.5) [draw, terminal,
-			minimum width = \smbwd,
-			minimum height = 0.5cm] {End};
-			
-			\coordinate (point1) at (-4.8,-7.5);
-			\coordinate (point2) at (3.2,-4.5);
-			\coordinate (point3) at (3.2,-8);
-			%% \coordinate (point2) at (-7,-3);
-			
-			\draw[->] (start) -- (parse);
-			\draw[->] (parse) |- (l-pool);
-			\draw[->] (parse) |- (r-pool);
-			\draw[->] (random) -- (rec-functor);
-			\draw[->] (l-pool) -- (rec-functor);
-			\draw[->] (k-base) -- (rec-functor);
-			\draw[->] (l-pool) -| (success-val);
-			\draw[->] (r-pool) -| (success-val);
-			\draw[->] (success-val) -- (success-check);
-			%% \draw[->] (success-check) -| node[above]{No} (l-pool);
-			\draw[->] (success-check) -- node[above]{No} (point1);
-			\draw[->] (point1) |- (l-pool);
-			\draw[->] (success-check) |- node[below]{Yes} (write-rh);
-			\draw[->] (success-check) |- node[below]{Yes} (reinforcement);
-			\draw[->] (write-rh) -- (steps);
-			\draw[->] (write-rh) |- (end);
-			\draw[->] (forgetful-para) -- (reinforcement);
-			%% \draw[->] (reinforcement) -- (k-base);
-			\draw[->] (point2) -- (k-base);
-			\draw[->] (point3) -- (point2);
-			\draw[->] (reinforcement) |- (point3);
-			\draw[->] (reinforcement) |- (end);
-		\end{tikzpicture}
-		\caption{The flowchart of the entire algorithm.}
-		\label{figure-3}
-	\end{figure}
+	figure 3 here.
 	
 	Via the process we described in the forth section and the data structures we presented in the third section, a mathematical proof can be conducted over category theory{'}s accurate representation. Then, a proof procedure is generated using the form of reflection history, that is, the historical list of the reflection functors utilized by the proof.
 	
@@ -708,37 +500,18 @@
 	
 	The discussion below is based on an implementation of the algorithm by us, called DefQed and is open-sourced on \cite{Wang2022}. It will be further described in the sixth section.
 	
-	To illustrate the performance of the brand-new algorithm, we construct a relatively simple exemplification. The source code describing the demonstration can be found on the internet through \cite{Wang2022-2}. The code for Wolfram Engine (or Wolfram Mathematica) is also presented.
+	To illustrate the performance of the brand-new algorithm, we construct a relatively simple exemplification. The source code describing the demonstration can be found on the internet through \cite{Wang2022-2}. Alongside the benchmark code of the algorithm in the repository is the benchmark code of the popular theorem prover Microsoft Z3. The code for Wolfram Engine (or Wolfram Mathematica) is also presented.
 	
-	The timing cost by the three provers are shown as below in \ref{table-2}.
+	The timing cost by the three provers are shown as below in ref{table-2}.
 	
-	\begin{table}[h]
-		\centering
-		\caption{Timing (ms) of the three algorithms.}
-		\begin{tabular}{ccc}
-			\toprule
-			Round$\sharp$ & DefQed & Wolfram Engine \\
-			\midrule
-			1 & 576 & 141  \\ 
-			2 & 727 & 250  \\ 
-			3 & 752 & 375  \\ 
-			4 & 889 & 266  \\ 
-			\bottomrule
-		\end{tabular}
-		\label{table-2}
-	\end{table}
+	table 2 here.
 	
-	The data can be further illustrated in \ref{figure-4}. The blue line stands for the time (milliseconds) of DefQed, while the orange line stands for the time (milliseconds) of Wolfram Engine.
+	The data can be further illustrated in ref{figure-4}. The blue line stands for the time (milliseconds) of DefQed, while the orange line stands for the time (milliseconds) of Wolfram Engine.
 	
-	\begin{figure}[h]
-		\centering
-		\includegraphics{plot.eps}
-		\caption{The plots of the data measures.}
-		\label{figure-4}
-	\end{figure}
-
-	From \ref{figure-4} we can obviously tell the time cost of the reasoning increases by the round, as more reflections are inserted into the database. It should be noted that for time reasons, the reduction algorithm is not implemented in this version of DefQed, and the coding quality can also be further improved.
-	 
+	figure 4 here.
+	
+	From ref{figure-4} we can obviously tell the time cost of the reasoning increases by the round, as more reflections are inserted into the database. It should be noted that for time reasons, the reduction algorithm is not implemented in this version of DefQed, and the coding quality can also be further improved.
+	
 	The experiment is done on a Hewlett-Packard ZBook mobile workstation 14u G5 \cite{HP-2018}. During the experiment, all the programs/applications not necessary are closed except for the terminal emulator (ConEmu) and the program to benchmark. The operating system is Microsoft Windows 11 Pro for Workstations Insider Preview (Build 25211). The processor is Intel Core i5 8250U and the memory size is 8.0 GB installed. We used Wolfram Language version 12.0 and DefQed version 0.03. As DefQed utilizes MySQL as its database, it is necessary to point out we are using MySQL version 8.0 (Community). The DefQed source code is built with option `Release Mode' for Microsoft Windows x64 processor with .NET 6.0 platform.
 	
 	We also need to point out that though in each round DefQed seems to be slower than others, it does not mean that the algorithm has a worse efficiency and performance when comparing to others. The performance difference between platform and programming language utilized by the two, .NET and mainly C contributes to the difference of the two applications, not mentioning that while Wolfram Engine can only prove equations, DefQed is a generic approach. The quality of the optimization of the codes are also not on be same basis.
@@ -757,14 +530,15 @@
 	\end{itemize}
 	
 	\section{Acknowledgments}
-	I express my sincerest gratitude to my tutor Prof. Shao Xinhui, the Yingcai Project of P.R.China, which enables senior high school students to conduct science research, my senior high academy Northeast Yucai School (NEYC) of P.R.China and the corresponding university Northern Eastern University (NEU) of P.R.China. I also thank my parents for encouraging me to conduct this research project.
+	I express my sincerest gratitude to my tutor PSX, the Y Project of P.R.China, which enables senior high school students to conduct science research, my senior high academy NXXX of P.R.China and the corresponding university XXU of P.R.China. I also thank my parents for encouraging me to conduct this research project.
 	
 	Additionally, I had few knowledge about \LaTeX before writing this paper. The $lshort$ documentation and the \TeX Stack Exchange helped me a lot. Here I express my genuine thankfulness to the online resources and documentation of the used \LaTeX packages and software components. 
 	
 	\section*{Conflict of interests}
-	This research did not receive any specific grant from funding agencies commercially. However, it does receive general aid from the Yingcai Project of P.R.China.
+	This research did not receive any specific grant from funding agencies in the public, commercial, or
+	not-for-profit sectors.
 	
-%	\bibliography{paper}
 	\bibliographystyle{unsrtnat}
-	\bibliography{paper}
+	\bibliography{tot}
+	
 \end{document}
