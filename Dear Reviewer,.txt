@@ -1,0 +1,30 @@
+Dear Reviewer,
+Thank you very much for your valuable time involved in reviewing the manuscript and your encouraging and constructive comments.
+We also appreciate your clear feedback and hope the explanation below has fully addressed all your concerns.
+
+Comment 1: Page 2, Line 30. scriptF
+Response:  This typo is corrected in the revised manuscript.
+
+Comment 2: Page 2, Line 31. andFor
+Response:  The missing of a space between 'and' and 'For' is a typo corrected in the revised manuscript. We originally intended to use 'For' to annotate the forgetful functor. However, this notation is clear enough and can easily lead to misunderstanding. For such reason, we have adapted the 'F_r' symbol to represent this functor.
+
+Comment 3: Page 2, Line 33. andxand
+Response:  This is also a misspelling, which is corrected in the revised manuscript.
+
+Comment 4: Page 3, Formula 3.1
+Response:  The description of formula 3.1 in the original manuscript is not clear enough. For this reason, we have added a paragraph after it to further elaborate on this formula.
+
+Comment 5: Page 3, Formula 3.2 "On>=1"
+Response:  The symbol "On>=1" means a set containing ordinals not smaller than 1. We admit that the symbol should be explained before using it. We have added two paragraphs in section 2.1 to explain this notation. In section 2.2 of the revised manuscript, we adapted some of the sentences and added ordinal theory as one of the preliminaries.
+
+The resubmitted files are:
+1. Math-7081-revised.pdf        the revised version of the manuscript (revisions not highlighted)
+2. Math-7081-revised.tex        the revised TeX source code (revisions not highlighted)
+3. Math-7081-revised-diff.pdf   the revised version of the manuscript (all revisions highlighted)
+4. Math-7081-revised-diff.tex   the revised TeX source code (all revisions highlighted)
+
+We would like to take this opportunity to thank you for all your time involved and this opportunity for us to imporive the manuscript. We hope you will find this revised version satisfactory.
+
+Sincerely,
+
+The Authors.
